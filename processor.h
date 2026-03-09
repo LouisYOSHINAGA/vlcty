@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vector>
 #include "public.sdk/source/vst/vstaudioeffect.h"
 #include "pluginterfaces/vst/ivstparameterchanges.h"
 #include "pluginterfaces/vst/ivstevents.h"
@@ -16,8 +15,8 @@ namespace Vst {
 
 
 class VelocityProcessor: public AudioEffect {
-    protected:
-       // impl if needed
+    private:
+       float velocity;
     public:
         static FUnknown* createInstance(void*);
         VelocityProcessor();

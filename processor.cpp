@@ -1,6 +1,4 @@
 #include "processor.h"
-#define _USE_MATH_DEFINES
-#include <math.h>
 #include "config.h"
 #include "const.h"
 
@@ -61,6 +59,9 @@ void VelocityProcessor::processParameter(ProcessData& data){
             continue;
         }
         switch(queue->getParameterId()){
+            case PARAM_ID_VELOCITY:
+                this->velocity = value;
+                break;
             default:
                 // do nothing
                 break;
@@ -102,8 +103,7 @@ void VelocityProcessor::applyVelocityFix(NoteOnEvent* noteOnEvent){
     if(noteOnEvent->velocity == 0){  // note off with velocity 0
         return;  // do nothing
     }
-    // temp impl; TODO fixme
-    noteOnEvent->velocity = 1.0;  // fixed max velocity
+    noteOnEvent->velocity = this->velocity;
 }
 
 

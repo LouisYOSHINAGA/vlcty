@@ -2,6 +2,6 @@
 
 
 typedef enum{
-    // add parameter id here if needed
+    PARAM_ID_VELOCITY,
     N_PARAMS
 } ParamID;
