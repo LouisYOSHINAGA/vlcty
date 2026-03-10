@@ -1,6 +1,7 @@
 #pragma once
 
 #include "public.sdk/source/vst/vsteditcontroller.h"
+#include "guieditor.h"
 
 
 namespace Steinberg {
@@ -24,6 +25,7 @@ class VelocityController: public EditController {
     public:
         static FUnknown* createInstance(void*);
         tresult PLUGIN_API initialize(FUnknown*);
+        IPlugView* PLUGIN_API createView(const char*);
 };
 
 

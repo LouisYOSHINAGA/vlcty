@@ -32,5 +32,13 @@ tresult PLUGIN_API VelocityController::initialize(FUnknown* context){
     return result;
 }
 
+IPlugView* PLUGIN_API VelocityController::createView(const char* name){
+    if(strcmp(name, "editor") == 0){
+        VelocityGUIEditor* view = new VelocityGUIEditor(this);
+        return view;
+    }
+    return 0;
+}
+
 
 } }
