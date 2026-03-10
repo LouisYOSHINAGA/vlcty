@@ -4,3 +4,4 @@
 *vcxproj
 *.vcxproj.user
 *.vcxproj.filters
+resources/figsrc/*
