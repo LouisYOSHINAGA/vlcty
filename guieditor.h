@@ -15,13 +15,13 @@ class VelocityGUIEditor : public VSTGUIEditor,
     protected:
         static constexpr uint16 BG_WIDTH = 400;
         static constexpr uint16 BG_HEIGHT = 185;
+        void createHorizontalSlider(ParamID, uint16, uint16);
     public:
         VelocityGUIEditor(EditController*);
         virtual bool PLUGIN_API open(void*, const PlatformType&);
         virtual void PLUGIN_API close();
         void valueChanged(CControl*);
         void createSlider(ParamID, uint16, uint16);
-
         DELEGATE_REFCOUNT(VSTGUIEditor)
 };
 

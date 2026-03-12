@@ -7,3 +7,5 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 
 
 background.png PNG "./resources/background.png"
+slider_track.png PNG "./resources/slider_track.png"
+slider_handle.png PNG "./resources/slider_handle.png"
