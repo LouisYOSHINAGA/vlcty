@@ -59,6 +59,7 @@ void VelocityGUIEditor::createHorizontalSlider(ParamID tag, uint16 x, uint16 y){
     CHorizontalSlider* slider = new CHorizontalSlider(size, this, tag,
                                                       x, x+slider_track->getWidth()-slider_handle->getWidth(),
                                                       slider_handle, slider_track);
+    slider->setStyle(CSlider::kLeft | CSlider::kHorizontal);
     CPoint track_offset(0, -(slider_handle->getHeight()-slider_track->getHeight())/2);
     slider->setBackgroundOffset(track_offset);
     slider->setValueNormalized(this->controller->getParamNormalized(tag));
