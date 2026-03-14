@@ -1,6 +1,6 @@
 #include "processor.h"
 #include "config.h"
-#include "const.h"
+#include "param.h"
 
 
 namespace Steinberg {
@@ -46,10 +46,8 @@ void VelocityProcessor::processParameter(ProcessData& data){
         return;
     }
 
-    int8 paramChangeCount = data.inputParameterChanges->getParameterCount();
     int32 sampleOffset;
     ParamValue value;
-
     for(int8 i = 0; i < data.inputParameterChanges->getParameterCount(); i++){
         IParamValueQueue* queue = data.inputParameterChanges->getParameterData(i);
         if(queue == nullptr){

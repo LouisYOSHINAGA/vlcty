@@ -49,23 +49,24 @@ void VelocityGUIEditor::valueChanged(CControl* control){
 }
 
 void VelocityGUIEditor::createHorizontalSlider(ParamID tag, uint16 x, uint16 y){
-    CBitmap* slider_track = new CBitmap("slider_track.png");
+    CBitmap* slider_background = new CBitmap("slider_background.png");
     CBitmap* slider_handle = new CBitmap("slider_handle.png");
 
-    CRect size(0, 0, slider_track->getWidth(), slider_handle->getHeight());
+    CRect size(0, 0, slider_background->getWidth(), slider_handle->getHeight());
     size.offset(x, y);
 
-
     CHorizontalSlider* slider = new CHorizontalSlider(size, this, tag,
-                                                      x, x+slider_track->getWidth()-slider_handle->getWidth(),
-                                                      slider_handle, slider_track);
+                                                      x, x+slider_background->getWidth()-slider_handle->getWidth(),
+                                                      slider_handle, slider_background);
     slider->setStyle(CSlider::kLeft | CSlider::kHorizontal);
-    CPoint track_offset(0, -(slider_handle->getHeight()-slider_track->getHeight())/2);
+
+    CPoint track_offset(0, -(slider_handle->getHeight()-slider_background->getHeight())/2);
     slider->setBackgroundOffset(track_offset);
+
     slider->setValueNormalized(this->controller->getParamNormalized(tag));
     frame->addView(slider);
 
-    slider_track->forget();
+    slider_background->forget();
     slider_handle->forget();
 }
 

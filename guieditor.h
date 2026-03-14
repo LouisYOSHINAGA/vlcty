@@ -2,7 +2,7 @@
 
 #include "public.sdk/source/vst/vstguieditor.h"
 #include "pluginterfaces/vst/ivstplugview.h"
-#include "config.h"
+#include "param.h"
 
 
 namespace Steinberg {
