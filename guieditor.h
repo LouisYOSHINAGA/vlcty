@@ -26,6 +26,8 @@ class VelocityGUIEditor : public VSTGUIEditor,
         void valueChanged(CControl*);
         void createLabel(UTF8StringPtr, uint16, uint16, uint16, uint16,
                          uint8 = 18, bool = false, CHoriTxtAlign = kLeftText);
+        void createCombobox(ParamID, std::vector<UTF8StringPtr>, uint16, uint16, uint16, uint16,
+                            uint8 = 18, bool = false, CHoriTxtAlign = kLeftText);
         void createSlider(ParamID, uint16, uint16);
         DELEGATE_REFCOUNT(VSTGUIEditor)
 };
