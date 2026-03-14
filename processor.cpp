@@ -13,6 +13,7 @@ FUnknown* VelocityProcessor::createInstance(void*){
 
 VelocityProcessor::VelocityProcessor(){
     setControllerClass(ControllerUID);
+    this->velocity = DEFAULT_VELOCITY;
 }
 
 tresult PLUGIN_API VelocityProcessor::initialize(FUnknown* context){

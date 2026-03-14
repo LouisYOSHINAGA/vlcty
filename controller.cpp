@@ -25,7 +25,7 @@ tresult PLUGIN_API VelocityController::initialize(FUnknown* context){
         127,  // step count
         0,  // min plain
         127,  // max plain
-        64  // default value plain
+        DEFAULT_VELOCITY  // default value plain
     );
     parameters.addParameter(velocity);
 

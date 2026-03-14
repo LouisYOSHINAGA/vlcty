@@ -28,7 +28,9 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
     cbmp->forget();  // release background image
     frame->open(parent);
 
-    this->createHorizontalSlider(PARAM_ID_VELOCITY, 30, 30);
+    this->createHorizontalSlider(PARAM_ID_VELOCITY, 30, 50);
+    this->createHorizontalSlider(PARAM_ID_VELOCITY, 30, 95);  // dummy
+    this->createHorizontalSlider(PARAM_ID_VELOCITY, 30, 140);  // dummy
 
     return true;
 }

@@ -5,12 +5,11 @@
 #include "pluginterfaces/vst/ivstevents.h"
 
 
-#define NUM_EVENT_CHANNELS 1
-
-
-using namespace std;
 namespace Steinberg {
 namespace Vst {
+
+
+constexpr int8 NUM_EVENT_CHANNELS = 1;
 
 
 class VelocityProcessor: public AudioEffect {
