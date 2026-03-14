@@ -21,7 +21,7 @@ class VelocityGUIEditor : public VSTGUIEditor,
         void createHorizontalSlider(ParamID, uint16, uint16);
     public:
         VelocityGUIEditor(EditController*);
-        virtual bool PLUGIN_API open(void*, const PlatformType&);
+        virtual bool PLUGIN_API open(void*, const PlatformType& = PlatformType::kDefaultNative);
         virtual void PLUGIN_API close();
         void valueChanged(CControl*);
         void createLabel(UTF8StringPtr, uint16, uint16, uint16, uint16,
