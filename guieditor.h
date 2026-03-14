@@ -5,6 +5,9 @@
 #include "param.h"
 
 
+// #define DEBUG_GUIEDITOR
+
+
 namespace Steinberg {
 namespace Vst {
 using namespace VSTGUI;
@@ -21,6 +24,8 @@ class VelocityGUIEditor : public VSTGUIEditor,
         virtual bool PLUGIN_API open(void*, const PlatformType&);
         virtual void PLUGIN_API close();
         void valueChanged(CControl*);
+        void createLabel(UTF8StringPtr, uint16, uint16, uint16, uint16,
+                         uint8 = 18, bool = false, CHoriTxtAlign = kLeftText);
         void createSlider(ParamID, uint16, uint16);
         DELEGATE_REFCOUNT(VSTGUIEditor)
 };

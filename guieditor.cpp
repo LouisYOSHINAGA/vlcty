@@ -1,4 +1,5 @@
 #include "guieditor.h"
+#include "config.h"
 
 
 namespace Steinberg {
@@ -28,9 +29,10 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
     cbmp->forget();  // release background image
     frame->open(parent);
 
-    this->createHorizontalSlider(PARAM_ID_VELOCITY, 30, 50);
-    this->createHorizontalSlider(PARAM_ID_VELOCITY, 30, 95);  // dummy
-    this->createHorizontalSlider(PARAM_ID_VELOCITY, 30, 140);  // dummy
+    this->createLabel(MYVST_VSTNAME, 30, 0, 150, 45, 18, true);
+    this->createHorizontalSlider(PARAM_ID_VELOCITY, 30, 45);
+    this->createHorizontalSlider(PARAM_ID_VELOCITY, 30, 90);  // dummy
+    this->createHorizontalSlider(PARAM_ID_VELOCITY, 30, 135);  // dummy
 
     return true;
 }
@@ -48,6 +50,27 @@ void VelocityGUIEditor::valueChanged(CControl* control){
     float value = control->getValueNormalized();
     this->controller->setParamNormalized(index, value);
     this->controller->performEdit(index, value);
+}
+
+void VelocityGUIEditor::createLabel(UTF8StringPtr text, uint16 x, uint16 y, uint16 w, uint16 h,
+                                    uint8 fontsize, bool isBold, CHoriTxtAlign align){
+    CRect size(0, 0, w, h);
+    size.offset(x, y);
+
+    CFontDesc* font = new CFontDesc("Consolas", fontsize,
+                                    isBold ? kBoldFace : kNormalFace);
+    CTextLabel* label = new CTextLabel(size, text);
+
+    label->setFont(font);
+    label->setHoriAlign(align);
+    label->setBackColor(kTransparentCColor);
+    #ifdef DEBUG_GUIEDITOR
+        label->setFrameColor(kWhiteCColor);
+    #else
+        label->setFrameColor(kTransparentCColor);
+    #endif
+
+    frame->addView(label);
 }
 
 void VelocityGUIEditor::createHorizontalSlider(ParamID tag, uint16 x, uint16 y){
