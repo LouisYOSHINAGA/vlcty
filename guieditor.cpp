@@ -36,18 +36,18 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
     this->createCombobox(PARAM_ID_TYPE, correctTypeNames, 200, 10, 80, 30,
                          this->defaultFontsize, false, kCenterText);
 
-    this->sliders[SLIDER_ID_VELOCITY_FIX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_FIX, 20, 45, false);
-    this->sliders[SLIDER_ID_VELOCITY_MAX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MAX, 20, 90, true);
-    this->sliders[SLIDER_ID_VELOCITY_MIN] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MIN, 20, 135, true);
+    this->sliders[SLIDER_ID_VELOCITY_FIX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_FIX, 25, 45, false);
+    this->sliders[SLIDER_ID_VELOCITY_MAX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MAX, 25, 90, true);
+    this->sliders[SLIDER_ID_VELOCITY_MIN] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MIN, 25, 135, true);
 
     this->sliderLabels[SLIDER_ID_VELOCITY_FIX] = this->createLabel(
-        std::string(this->sliderNames[SLIDER_ID_VELOCITY_FIX]) + ":", 300, 45, 50, 40, false
+        std::string(this->sliderNames[SLIDER_ID_VELOCITY_FIX]) + ":", 305, 45, 50, 40, false
     );
     this->sliderLabels[SLIDER_ID_VELOCITY_MIN] = this->createLabel(
-        std::string(this->sliderNames[SLIDER_ID_VELOCITY_MIN]) + ":", 300, 90, 50, 40, true
+        std::string(this->sliderNames[SLIDER_ID_VELOCITY_MIN]) + ":", 305, 90, 50, 40, true
     );
     this->sliderLabels[SLIDER_ID_VELOCITY_MAX] = this->createLabel(
-        std::string(this->sliderNames[SLIDER_ID_VELOCITY_MAX]) + ":", 300, 135, 50, 40, true
+        std::string(this->sliderNames[SLIDER_ID_VELOCITY_MAX]) + ":", 305, 135, 50, 40, true
     );
 
     this->textEdits[SLIDER_ID_VELOCITY_FIX] = this->createTextEdit(PARAM_ID_VELOCITY_FIX, 350, 45, 50, 40, false);
