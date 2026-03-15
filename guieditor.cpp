@@ -1,5 +1,7 @@
 #include "guieditor.h"
 #include "config.h"
+#include <stdexcept>
+#include <cstdio>  // for debug
 
 
 namespace Steinberg {
@@ -46,6 +48,9 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
     this->textEdits[SLIDER_ID_VELOCITY_FIX] = this->createTextEdit(PARAM_ID_VELOCITY_FIX, 350, 45, 50, 40, false);
     this->textEdits[SLIDER_ID_VELOCITY_MAX] = this->createTextEdit(PARAM_ID_VELOCITY_MAX, 350, 90, 50, 40, true);
     this->textEdits[SLIDER_ID_VELOCITY_MIN] = this->createTextEdit(PARAM_ID_VELOCITY_MIN, 350, 135, 50, 40, true);
+    for(int8 i = 0; i < N_SLIDERS; i++){
+        this->textEdits[i]->setStringToValueFunction(&VelocityGUIEditor::parseInputText);
+    }
 
     return true;
 }
@@ -229,6 +234,24 @@ CTextEdit* VelocityGUIEditor::createTextEdit(ParamID tag, uint16 x, uint16 y, ui
 void VelocityGUIEditor::lockTextEdit(CTextEdit* textEdit, bool isLock){
     textEdit->setMouseEnabled(!isLock);
     textEdit->setAlphaValue(isLock? 0.2: 1.0);
+}
+
+bool VelocityGUIEditor::parseInputText(UTF8StringPtr inputText, float& value, CTextEdit* textEdit){
+    try{
+        size_t idx;
+        float inputValue = std::stof(std::string(inputText), &idx);
+        if(idx != std::string(inputText).length()){
+            throw std::invalid_argument("invalid input");
+        }else if(inputValue < MIN_VELOCITY || MAX_VELOCITY < inputValue){
+            throw std::out_of_range("out of range");
+        }
+
+        value = inputValue / MAX_VELOCITY;
+    }catch(...){
+        return false;
+    }
+
+    return true;
 }
 
 

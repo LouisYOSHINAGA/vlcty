@@ -51,6 +51,7 @@ class VelocityGUIEditor : public VSTGUIEditor,
         CTextEdit* createTextEdit(ParamID, uint16, uint16, uint16, uint16,
                                   bool = false, uint8 = DEFAULT_FONTSIZE, bool = false, CHoriTxtAlign = kLeftText);
         void lockTextEdit(CTextEdit*, bool = true);
+        static bool parseInputText(UTF8StringPtr, float&, CTextEdit*);
     public:
         VelocityGUIEditor(EditController*);
         virtual bool PLUGIN_API open(void*, const PlatformType& = PlatformType::kDefaultNative);
