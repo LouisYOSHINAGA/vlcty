@@ -29,17 +29,20 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
     frame->open(parent);
     cbmp->forget();  // release background image
 
-    this->createLabel(MYVST_VSTNAME, 25, 0, 150, 45, 18, true);
+    this->createLabel(MYVST_VSTNAME, 25, 0, 150, 45, false, 18, true);
     this->createCombobox(PARAM_ID_TYPE, correctTypeNames, 200, 10, 80, 30, 18, false, kCenterText);
+
     this->sliders[SLIDER_ID_VELOCITY_FIX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_FIX, 20, 45, false);
     this->sliders[SLIDER_ID_VELOCITY_MAX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MAX, 20, 90, true);
     this->sliders[SLIDER_ID_VELOCITY_MIN] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MIN, 20, 135, true);
+
     this->sliderLabels[SLIDER_ID_VELOCITY_FIX] = this->createLabel(std::string(this->sliderNames[SLIDER_ID_VELOCITY_FIX]) + ":",
-                                                                   300, 45, 50, 40);
+                                                                   300, 45, 50, 40, false);
     this->sliderLabels[SLIDER_ID_VELOCITY_MIN] = this->createLabel(std::string(this->sliderNames[SLIDER_ID_VELOCITY_MIN]) + ":",
-                                                                   300, 90, 50, 40);
+                                                                   300, 90, 50, 40, true);
     this->sliderLabels[SLIDER_ID_VELOCITY_MAX] = this->createLabel(std::string(this->sliderNames[SLIDER_ID_VELOCITY_MAX]) + ":",
-                                                                   300, 135, 50, 40);
+                                                                   300, 135, 50, 40, true);
+
     this->textEdits[SLIDER_ID_VELOCITY_FIX] = this->createTextEdit(PARAM_ID_VELOCITY_FIX, 350, 45, 50, 40, false);
     this->textEdits[SLIDER_ID_VELOCITY_MAX] = this->createTextEdit(PARAM_ID_VELOCITY_MAX, 350, 90, 50, 40, true);
     this->textEdits[SLIDER_ID_VELOCITY_MIN] = this->createTextEdit(PARAM_ID_VELOCITY_MIN, 350, 135, 50, 40, true);
@@ -102,12 +105,12 @@ void VelocityGUIEditor::valueChanged(CControl* control){
 }
 
 CTextLabel* VelocityGUIEditor::createLabel(std::string text, uint16 x, uint16 y, uint16 w, uint16 h,
-                                           uint8 fontsize, bool isBold, CHoriTxtAlign align){
-    return this->createLabel(text.c_str(), x, y, w, h, fontsize, isBold, align);
+                                           bool isLock, uint8 fontsize, bool isBold, CHoriTxtAlign align){
+    return this->createLabel(text.c_str(), x, y, w, h, isLock, fontsize, isBold, align);
 }
 
 CTextLabel* VelocityGUIEditor::createLabel(UTF8StringPtr text, uint16 x, uint16 y, uint16 w, uint16 h,
-                                           uint8 fontsize, bool isBold, CHoriTxtAlign align){
+                                           bool isLock, uint8 fontsize, bool isBold, CHoriTxtAlign align){
     CRect size(0, 0, w, h);
     size.offset(x, y);
 
@@ -124,6 +127,10 @@ CTextLabel* VelocityGUIEditor::createLabel(UTF8StringPtr text, uint16 x, uint16 
     #endif
 
     frame->addView(label);
+
+    if(isLock){
+        this->lockLabel(label, true);
+    }
 
     return label;
 }
@@ -198,7 +205,7 @@ CTextEdit* VelocityGUIEditor::createTextEdit(ParamID tag, uint16 x, uint16 y, ui
 
     textEdit->setFont(font);
     textEdit->setHoriAlign(align);
-    textEdit->setBackColor(kTransparentCColor);
+    textEdit->setBackColor(this->defaultBackgroundColor);
     #ifdef DEBUG_GUIEDITOR
         textEdit->setFrameColor(kWhiteCColor);
     #else
@@ -211,7 +218,7 @@ CTextEdit* VelocityGUIEditor::createTextEdit(ParamID tag, uint16 x, uint16 y, ui
     );
 
     frame->addView(textEdit);
-    
+
     if(isLock){
         this->lockTextEdit(textEdit, true);
     }

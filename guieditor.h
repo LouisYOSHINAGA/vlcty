@@ -20,6 +20,7 @@ class VelocityGUIEditor : public VSTGUIEditor,
         static constexpr uint16 BG_WIDTH = 400;
         static constexpr uint16 BG_HEIGHT = 185;
         static constexpr uint8 DEFAULT_FONTSIZE = 18;
+        static constexpr CColor defaultBackgroundColor = CColor(91, 155, 213, 255);
 
         enum{
             SLIDER_ID_VELOCITY_FIX,
@@ -39,9 +40,9 @@ class VelocityGUIEditor : public VSTGUIEditor,
         CTextEdit* textEdits[N_SLIDERS];
 
         CTextLabel* createLabel(std::string, uint16, uint16, uint16, uint16,
-                                uint8 = DEFAULT_FONTSIZE, bool = false, CHoriTxtAlign = kLeftText);
+                                bool = false, uint8 = DEFAULT_FONTSIZE, bool = false, CHoriTxtAlign = kLeftText);
         CTextLabel* createLabel(UTF8StringPtr, uint16, uint16, uint16, uint16,
-                                uint8 = DEFAULT_FONTSIZE, bool = false, CHoriTxtAlign = kLeftText);
+                                bool = false, uint8 = DEFAULT_FONTSIZE, bool = false, CHoriTxtAlign = kLeftText);
         void lockLabel(CTextLabel*, bool = true);
         COptionMenu* createCombobox(ParamID, std::vector<UTF8StringPtr>, uint16, uint16, uint16, uint16,
                                     uint8 = DEFAULT_FONTSIZE, bool = false, CHoriTxtAlign = kLeftText);
