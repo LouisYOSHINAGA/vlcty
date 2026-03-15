@@ -16,9 +16,18 @@ using namespace VSTGUI;
 
 class VelocityGUIEditor : public VSTGUIEditor,
                           public IControlListener {
+    public:
+        VelocityGUIEditor(EditController*);
+        virtual bool PLUGIN_API open(void*, const PlatformType& = PlatformType::kDefaultNative);
+        virtual void PLUGIN_API close();
+        void valueChanged(CControl*);
+        DELEGATE_REFCOUNT(VSTGUIEditor)
+
     protected:
+        // constants
         static constexpr uint16 BG_WIDTH = 400;
         static constexpr uint16 BG_HEIGHT = 185;
+        static constexpr UTF8StringPtr defaultFontName = "Consolas";
         static constexpr uint8 DEFAULT_FONTSIZE = 18;
         static constexpr CColor defaultBackgroundColor = CColor(91, 155, 213, 255);
 
@@ -34,30 +43,36 @@ class VelocityGUIEditor : public VSTGUIEditor,
             "Max"
         };
 
-
+        // pointers to controls
         CHorizontalSlider* sliders[N_SLIDERS];
         CTextLabel* sliderLabels[N_SLIDERS];
         CTextEdit* textEdits[N_SLIDERS];
 
+        // label
         CTextLabel* createLabel(std::string, uint16, uint16, uint16, uint16,
-                                bool = false, uint8 = DEFAULT_FONTSIZE, bool = false, CHoriTxtAlign = kLeftText);
+                                bool = false, uint8 = DEFAULT_FONTSIZE,
+                                bool = false, CHoriTxtAlign = kLeftText);
         CTextLabel* createLabel(UTF8StringPtr, uint16, uint16, uint16, uint16,
-                                bool = false, uint8 = DEFAULT_FONTSIZE, bool = false, CHoriTxtAlign = kLeftText);
+                                bool = false, uint8 = DEFAULT_FONTSIZE,
+                                bool = false, CHoriTxtAlign = kLeftText);
         void lockLabel(CTextLabel*, bool = true);
-        COptionMenu* createCombobox(ParamID, std::vector<UTF8StringPtr>, uint16, uint16, uint16, uint16,
-                                    uint8 = DEFAULT_FONTSIZE, bool = false, CHoriTxtAlign = kLeftText);
+
+        // combobox
+        COptionMenu* createCombobox(ParamID, std::vector<UTF8StringPtr>,
+                                    uint16, uint16, uint16, uint16,
+                                    uint8 = DEFAULT_FONTSIZE, bool = false,
+                                    CHoriTxtAlign = kLeftText);
+
+        // horizontal slider
         CHorizontalSlider* createHorizontalSlider(ParamID, uint16, uint16, bool = false);
         void lockHorizontalSlider(CHorizontalSlider*, bool = true);
+
+        // text edit
         CTextEdit* createTextEdit(ParamID, uint16, uint16, uint16, uint16,
-                                  bool = false, uint8 = DEFAULT_FONTSIZE, bool = false, CHoriTxtAlign = kLeftText);
+                                  bool = false, uint8 = DEFAULT_FONTSIZE,
+                                  bool = false, CHoriTxtAlign = kLeftText);
         void lockTextEdit(CTextEdit*, bool = true);
         static bool parseInputText(UTF8StringPtr, float&, CTextEdit*);
-    public:
-        VelocityGUIEditor(EditController*);
-        virtual bool PLUGIN_API open(void*, const PlatformType& = PlatformType::kDefaultNative);
-        virtual void PLUGIN_API close();
-        void valueChanged(CControl*);
-        DELEGATE_REFCOUNT(VSTGUIEditor)
 };
 
 

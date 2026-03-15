@@ -1,7 +1,6 @@
 #include "guieditor.h"
 #include "config.h"
 #include <stdexcept>
-#include <cstdio>  // for debug
 
 
 namespace Steinberg {
@@ -31,6 +30,7 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
     frame->open(parent);
     cbmp->forget();  // release background image
 
+    // controls
     this->createLabel(MYVST_VSTNAME, 25, 0, 150, 45, false, 18, true);
     this->createCombobox(PARAM_ID_TYPE, correctTypeNames, 200, 10, 80, 30, 18, false, kCenterText);
 
@@ -38,12 +38,15 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
     this->sliders[SLIDER_ID_VELOCITY_MAX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MAX, 20, 90, true);
     this->sliders[SLIDER_ID_VELOCITY_MIN] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MIN, 20, 135, true);
 
-    this->sliderLabels[SLIDER_ID_VELOCITY_FIX] = this->createLabel(std::string(this->sliderNames[SLIDER_ID_VELOCITY_FIX]) + ":",
-                                                                   300, 45, 50, 40, false);
-    this->sliderLabels[SLIDER_ID_VELOCITY_MIN] = this->createLabel(std::string(this->sliderNames[SLIDER_ID_VELOCITY_MIN]) + ":",
-                                                                   300, 90, 50, 40, true);
-    this->sliderLabels[SLIDER_ID_VELOCITY_MAX] = this->createLabel(std::string(this->sliderNames[SLIDER_ID_VELOCITY_MAX]) + ":",
-                                                                   300, 135, 50, 40, true);
+    this->sliderLabels[SLIDER_ID_VELOCITY_FIX] = this->createLabel(
+        std::string(this->sliderNames[SLIDER_ID_VELOCITY_FIX]) + ":", 300, 45, 50, 40, false
+    );
+    this->sliderLabels[SLIDER_ID_VELOCITY_MIN] = this->createLabel(
+        std::string(this->sliderNames[SLIDER_ID_VELOCITY_MIN]) + ":", 300, 90, 50, 40, true
+    );
+    this->sliderLabels[SLIDER_ID_VELOCITY_MAX] = this->createLabel(
+        std::string(this->sliderNames[SLIDER_ID_VELOCITY_MAX]) + ":", 300, 135, 50, 40, true
+    );
 
     this->textEdits[SLIDER_ID_VELOCITY_FIX] = this->createTextEdit(PARAM_ID_VELOCITY_FIX, 350, 45, 50, 40, false);
     this->textEdits[SLIDER_ID_VELOCITY_MAX] = this->createTextEdit(PARAM_ID_VELOCITY_MAX, 350, 90, 50, 40, true);
@@ -69,40 +72,49 @@ void VelocityGUIEditor::valueChanged(CControl* control){
 
     switch(paramId){
         case PARAM_ID_TYPE:
-            if(static_cast<CorrectTypeID>(index) == CORRECT_TYPE_FIX){
-                this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_FIX], false);
-                this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MIN], true);
-                this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MAX], true);
-                this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_FIX], false);
-                this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MIN], true);
-                this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MAX], true);
-                this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_FIX], false);
-                this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_MIN], true);
-                this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_MAX], true);
-            }else{
-                this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_FIX], true);
-                this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MIN], false);
-                this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MAX], false);
-                this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_FIX], true);
-                this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MIN], false);
-                this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MAX], false);
-                this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_FIX], true);
-                this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_MIN], false);
-                this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_MAX], false);
+            bool isLockFix, isLockMin, isLockMax;
+            if(static_cast<CorrectTypeID>(index) == CORRECT_TYPE_FIX){  // fix
+                isLockFix = false;
+                isLockMin = isLockMax = true;
+            }else{  // remap, clip
+                isLockFix = true;
+                isLockMin = isLockMax = false;
             }
+
+            this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_FIX], isLockFix);
+            this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MIN], isLockMin);
+            this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MAX], isLockMax);
+
+            this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_FIX], isLockFix);
+            this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MIN], isLockMin);
+            this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MAX], isLockMax);
+
+            this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_FIX], isLockFix);
+            this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_MIN], isLockMin);
+            this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_MAX], isLockMax);
             break;
+
         case PARAM_ID_VELOCITY_FIX:
-            this->textEdits[SLIDER_ID_VELOCITY_FIX]->setText(std::to_string(static_cast<uint8>(value * MAX_VELOCITY)).c_str());
+            this->textEdits[SLIDER_ID_VELOCITY_FIX]->setText(
+                std::to_string(static_cast<uint8>(value * MAX_VELOCITY)).c_str()
+            );
             this->sliders[SLIDER_ID_VELOCITY_FIX]->setValueNormalized(value);
             break;
+
         case PARAM_ID_VELOCITY_MIN:
-            this->textEdits[SLIDER_ID_VELOCITY_MIN]->setText(std::to_string(static_cast<uint8>(value * MAX_VELOCITY)).c_str());
+            this->textEdits[SLIDER_ID_VELOCITY_MIN]->setText(
+                std::to_string(static_cast<uint8>(value * MAX_VELOCITY)).c_str()
+            );
             this->sliders[SLIDER_ID_VELOCITY_MIN]->setValueNormalized(value);
             break;
+
         case PARAM_ID_VELOCITY_MAX:
-            this->textEdits[SLIDER_ID_VELOCITY_MAX]->setText(std::to_string(static_cast<uint8>(value * MAX_VELOCITY)).c_str());
+            this->textEdits[SLIDER_ID_VELOCITY_MAX]->setText(
+                std::to_string(static_cast<uint8>(value * MAX_VELOCITY)).c_str()
+            );
             this->sliders[SLIDER_ID_VELOCITY_MAX]->setValueNormalized(value);
             break;
+
         default:
             // do nothing
             break;
@@ -122,7 +134,7 @@ CTextLabel* VelocityGUIEditor::createLabel(UTF8StringPtr text, uint16 x, uint16 
     CRect size(0, 0, w, h);
     size.offset(x, y);
 
-    CFontDesc* font = new CFontDesc("Consolas", fontsize, isBold? kBoldFace: kNormalFace);
+    CFontDesc* font = new CFontDesc(this->defaultFontName, fontsize, isBold? kBoldFace: kNormalFace);
     CTextLabel* label = new CTextLabel(size, text);
 
     label->setFont(font);
@@ -153,7 +165,7 @@ COptionMenu* VelocityGUIEditor::createCombobox(ParamID tag, std::vector<UTF8Stri
     CRect size(0, 0, w, h);
     size.offset(x, y);
 
-    CFontDesc* font = new CFontDesc("Consolas", fontsize, isBold? kBoldFace: kNormalFace);
+    CFontDesc* font = new CFontDesc(this->defaultFontName, fontsize, isBold? kBoldFace: kNormalFace);
     COptionMenu* combobox = new COptionMenu(size, this, tag);
 
     for(uint8 i = 0; i < items.size(); i++){
@@ -208,7 +220,7 @@ CTextEdit* VelocityGUIEditor::createTextEdit(ParamID tag, uint16 x, uint16 y, ui
     CRect size(0, 0, w, h);
     size.offset(x, y);
 
-    CFontDesc* font = new CFontDesc("Consolas", fontsize, isBold? kBoldFace: kNormalFace);
+    CFontDesc* font = new CFontDesc(this->defaultFontName, fontsize, isBold? kBoldFace: kNormalFace);
     CTextEdit* textEdit = new CTextEdit(size, this, tag);
 
     textEdit->setFont(font);
