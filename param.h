@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pluginterfaces/base/ftypes.h"
+#include "vstgui/lib/vstguibase.h"
 #include <vector>
 
 
@@ -27,4 +28,5 @@ inline std::vector<VSTGUI::UTF8StringPtr> correctTypeNames = {
 };
 
 
-constexpr Steinberg::int8 DEFAULT_VELOCITY = 64;
+constexpr Steinberg::uint8 N_VELOCITY_STEPS = 128;
+constexpr Steinberg::uint8 DEFAULT_VELOCITY = 64;

@@ -1,6 +1,5 @@
 #include "controller.h"
 #include "config.h"
-#include "param.h"
 
 
 namespace Steinberg {
@@ -18,36 +17,21 @@ tresult PLUGIN_API VelocityController::initialize(FUnknown* context){
         return result;
     }
 
-    DiscreteRangeParameter* velocityFix = new DiscreteRangeParameter(
+    VelocityStepParameter* velocityFix = new VelocityStepParameter(
         STR16("Velocity Fix"),  // title
-        PARAM_ID_VELOCITY_FIX,  // tag
-        nullptr,  // units
-        127,  // step count
-        0,  // min plain
-        127,  // max plain
-        DEFAULT_VELOCITY  // default value plain
+        PARAM_ID_VELOCITY_FIX  // tag
     );
     parameters.addParameter(velocityFix);
 
-    DiscreteRangeParameter* velocityMin = new DiscreteRangeParameter(
+    VelocityStepParameter* velocityMin = new VelocityStepParameter(
         STR16("Velocity Min"),  // title
-        PARAM_ID_VELOCITY_MIN,  // tag
-        nullptr,  // units
-        127,  // step count
-        0,  // min plain
-        127,  // max plain
-        DEFAULT_VELOCITY  // default value plain
+        PARAM_ID_VELOCITY_MIN  // tag
     );
     parameters.addParameter(velocityMin);
 
-    DiscreteRangeParameter* velocityMax = new DiscreteRangeParameter(
+    VelocityStepParameter* velocityMax = new VelocityStepParameter(
         STR16("Velocity Max"),  // title
-        PARAM_ID_VELOCITY_MAX,  // tag
-        nullptr,  // units
-        127,  // step count
-        0,  // min plain
-        127,  // max plain
-        DEFAULT_VELOCITY  // default value plain
+        PARAM_ID_VELOCITY_MAX  // tag
     );
     parameters.addParameter(velocityMax);
 

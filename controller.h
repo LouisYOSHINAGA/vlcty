@@ -1,6 +1,7 @@
 #pragma once
 
 #include "public.sdk/source/vst/vsteditcontroller.h"
+#include "param.h"
 #include "guieditor.h"
 
 
@@ -8,14 +9,14 @@ namespace Steinberg {
 namespace Vst {
 
 
-class DiscreteRangeParameter: public RangeParameter{
+class VelocityStepParameter: public RangeParameter{
     public:
-        DiscreteRangeParameter(
-            const TChar* title, ParamID tag, const TChar* units = 0, int32 stepCount = 99,
-            ParamValue minPlain = 0, ParamValue maxPlain = 99, ParamValue defaultValuePlain = 0,
-            int32 flags = ParameterInfo::kCanAutomate, UnitID unitID = kRootUnitId
-        ): RangeParameter(title, tag, units, minPlain, maxPlain, defaultValuePlain,
-                          stepCount, flags, unitID){
+        VelocityStepParameter(
+            const TChar* title, ParamID tag,
+            int32 stepCount = N_VELOCITY_STEPS-1, ParamValue defaultValuePlain = DEFAULT_VELOCITY,
+            ParamValue minPlain = 0, ParamValue maxPlain = N_VELOCITY_STEPS-1,
+            int32 flags = ParameterInfo::kCanAutomate, const TChar* units = nullptr, UnitID unitID = kRootUnitId
+        ): RangeParameter(title, tag, units, minPlain, maxPlain, defaultValuePlain, stepCount, flags, unitID){
             this->setPrecision(0);
         }
 };

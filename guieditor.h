@@ -18,6 +18,7 @@ class VelocityGUIEditor : public VSTGUIEditor,
     protected:
         static constexpr uint16 BG_WIDTH = 400;
         static constexpr uint16 BG_HEIGHT = 185;
+        static constexpr uint8 DEFAULT_FONTSIZE = 18;
         enum{
             SLIDER_ID_VELOCITY_FIX,
             SLIDER_ID_VELOCITY_MIN,
@@ -28,9 +29,9 @@ class VelocityGUIEditor : public VSTGUIEditor,
         CHorizontalSlider* sliders[N_SLIDERS];
 
         CTextLabel* createLabel(UTF8StringPtr, uint16, uint16, uint16, uint16,
-                                uint8 = 18, bool = false, CHoriTxtAlign = kLeftText);
+                                uint8 = DEFAULT_FONTSIZE, bool = false, CHoriTxtAlign = kLeftText);
         COptionMenu* createCombobox(ParamID, std::vector<UTF8StringPtr>, uint16, uint16, uint16, uint16,
-                                    uint8 = 18, bool = false, CHoriTxtAlign = kLeftText);
+                                    uint8 = DEFAULT_FONTSIZE, bool = false, CHoriTxtAlign = kLeftText);
         CHorizontalSlider* createHorizontalSlider(ParamID, uint16, uint16, bool = false);
         void lockSlider(CHorizontalSlider*, bool = true);
     public:
