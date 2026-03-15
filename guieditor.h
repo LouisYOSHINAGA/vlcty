@@ -18,17 +18,26 @@ class VelocityGUIEditor : public VSTGUIEditor,
     protected:
         static constexpr uint16 BG_WIDTH = 400;
         static constexpr uint16 BG_HEIGHT = 185;
-        void createHorizontalSlider(ParamID, uint16, uint16);
+        enum{
+            SLIDER_ID_VELOCITY_FIX,
+            SLIDER_ID_VELOCITY_MIN,
+            SLIDER_ID_VELOCITY_MAX,
+            N_SLIDERS
+        } SliderID;
+
+        CHorizontalSlider* sliders[N_SLIDERS];
+
+        CTextLabel* createLabel(UTF8StringPtr, uint16, uint16, uint16, uint16,
+                                uint8 = 18, bool = false, CHoriTxtAlign = kLeftText);
+        COptionMenu* createCombobox(ParamID, std::vector<UTF8StringPtr>, uint16, uint16, uint16, uint16,
+                                    uint8 = 18, bool = false, CHoriTxtAlign = kLeftText);
+        CHorizontalSlider* createHorizontalSlider(ParamID, uint16, uint16, bool = false);
+        void lockSlider(CHorizontalSlider*, bool = true);
     public:
         VelocityGUIEditor(EditController*);
         virtual bool PLUGIN_API open(void*, const PlatformType& = PlatformType::kDefaultNative);
         virtual void PLUGIN_API close();
         void valueChanged(CControl*);
-        void createLabel(UTF8StringPtr, uint16, uint16, uint16, uint16,
-                         uint8 = 18, bool = false, CHoriTxtAlign = kLeftText);
-        void createCombobox(ParamID, std::vector<UTF8StringPtr>, uint16, uint16, uint16, uint16,
-                            uint8 = 18, bool = false, CHoriTxtAlign = kLeftText);
-        void createSlider(ParamID, uint16, uint16);
         DELEGATE_REFCOUNT(VSTGUIEditor)
 };
 

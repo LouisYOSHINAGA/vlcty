@@ -58,8 +58,17 @@ void VelocityProcessor::processParameter(ProcessData& data){
             continue;
         }
         switch(queue->getParameterId()){
-            case PARAM_ID_VELOCITY:
+            case PARAM_ID_TYPE:
+                // TODO impl
+                break;
+            case PARAM_ID_VELOCITY_FIX:
                 this->velocity = value;
+                break;
+            case PARAM_ID_VELOCITY_MIN:
+                // TODO impl
+                break;
+            case PARAM_ID_VELOCITY_MAX:
+                // TODO impl
                 break;
             default:
                 // do nothing

@@ -31,9 +31,9 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
 
     this->createLabel(MYVST_VSTNAME, 30, 0, 150, 45, 18, true);
     this->createCombobox(PARAM_ID_TYPE, correctTypeNames, 200, 10, 80, 30, 18, false, kCenterText);
-    this->createHorizontalSlider(PARAM_ID_VELOCITY, 30, 45);
-    this->createHorizontalSlider(PARAM_ID_VELOCITY, 30, 90);  // dummy
-    this->createHorizontalSlider(PARAM_ID_VELOCITY, 30, 135);  // dummy
+    this->sliders[SLIDER_ID_VELOCITY_FIX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_FIX, 30, 45, false);
+    this->sliders[SLIDER_ID_VELOCITY_MAX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MAX, 30, 90, true);
+    this->sliders[SLIDER_ID_VELOCITY_MIN] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MIN, 30, 135, true);
 
     return true;
 }
@@ -46,13 +46,32 @@ void PLUGIN_API VelocityGUIEditor::close(){
 }
 
 void VelocityGUIEditor::valueChanged(CControl* control){
-    int32 index = control->getTag();
+    int8 paramId = control->getTag();
+    int8 index = control->getValue();
     float value = control->getValueNormalized();
-    this->controller->setParamNormalized(index, value);
-    this->controller->performEdit(index, value);
+
+    if(paramId == PARAM_ID_TYPE){
+        if(static_cast<CorrectTypeID>(index) == CORRECT_TYPE_FIX){
+            this->lockSlider(this->sliders[SLIDER_ID_VELOCITY_FIX], false);
+            this->lockSlider(this->sliders[SLIDER_ID_VELOCITY_MIN], true);
+            this->lockSlider(this->sliders[SLIDER_ID_VELOCITY_MAX], true);
+        }else{
+            this->lockSlider(this->sliders[SLIDER_ID_VELOCITY_FIX], true);
+            this->lockSlider(this->sliders[SLIDER_ID_VELOCITY_MIN], false);
+            this->lockSlider(this->sliders[SLIDER_ID_VELOCITY_MAX], false);
+        }
+    }
+
+    this->controller->setParamNormalized(paramId, value);
+    this->controller->performEdit(paramId, value);
 }
 
-void VelocityGUIEditor::createLabel(UTF8StringPtr text, uint16 x, uint16 y, uint16 w, uint16 h,
+void VelocityGUIEditor::lockSlider(CHorizontalSlider* slider, bool isLock){
+    slider->setMouseEnabled(!isLock);
+    slider->setAlphaValue(isLock? 0.2: 1.0);
+}
+
+CTextLabel* VelocityGUIEditor::createLabel(UTF8StringPtr text, uint16 x, uint16 y, uint16 w, uint16 h,
                                     uint8 fontsize, bool isBold, CHoriTxtAlign align){
     CRect size(0, 0, w, h);
     size.offset(x, y);
@@ -70,11 +89,13 @@ void VelocityGUIEditor::createLabel(UTF8StringPtr text, uint16 x, uint16 y, uint
     #endif
 
     frame->addView(label);
+
+    return label;
 }
 
-void VelocityGUIEditor::createCombobox(ParamID tag, std::vector<UTF8StringPtr> items,
-                                       uint16 x, uint16 y, uint16 w, uint16 h,
-                                       uint8 fontsize, bool isBold, CHoriTxtAlign align){
+COptionMenu* VelocityGUIEditor::createCombobox(ParamID tag, std::vector<UTF8StringPtr> items,
+                                               uint16 x, uint16 y, uint16 w, uint16 h,
+                                               uint8 fontsize, bool isBold, CHoriTxtAlign align){
     CRect size(0, 0, w, h);
     size.offset(x, y);
 
@@ -91,9 +112,11 @@ void VelocityGUIEditor::createCombobox(ParamID tag, std::vector<UTF8StringPtr> i
     combobox->setValueNormalized(this->controller->getParamNormalized(tag));
 
     frame->addView(combobox);
+
+    return combobox;
 }
 
-void VelocityGUIEditor::createHorizontalSlider(ParamID tag, uint16 x, uint16 y){
+CHorizontalSlider* VelocityGUIEditor::createHorizontalSlider(ParamID tag, uint16 x, uint16 y, bool isLock){
     CBitmap* sliderBackground = new CBitmap("sliderBackground.png");
     CBitmap* sliderHandle = new CBitmap("sliderHandle.png");
 
@@ -113,6 +136,12 @@ void VelocityGUIEditor::createHorizontalSlider(ParamID tag, uint16 x, uint16 y){
 
     sliderBackground->forget();
     sliderHandle->forget();
+
+    if(isLock){
+        this->lockSlider(slider, true);
+    }
+
+    return slider;
 }
 
 

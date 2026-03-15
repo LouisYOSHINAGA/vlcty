@@ -6,7 +6,9 @@
 
 typedef enum{
     PARAM_ID_TYPE,
-    PARAM_ID_VELOCITY,
+    PARAM_ID_VELOCITY_FIX,
+    PARAM_ID_VELOCITY_MIN,
+    PARAM_ID_VELOCITY_MAX,
     N_PARAMS
 } ParamID;
 
