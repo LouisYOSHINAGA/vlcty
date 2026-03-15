@@ -29,11 +29,20 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
     frame->open(parent);
     cbmp->forget();  // release background image
 
-    this->createLabel(MYVST_VSTNAME, 30, 0, 150, 45, 18, true);
+    this->createLabel(MYVST_VSTNAME, 25, 0, 150, 45, 18, true);
     this->createCombobox(PARAM_ID_TYPE, correctTypeNames, 200, 10, 80, 30, 18, false, kCenterText);
-    this->sliders[SLIDER_ID_VELOCITY_FIX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_FIX, 30, 45, false);
-    this->sliders[SLIDER_ID_VELOCITY_MAX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MAX, 30, 90, true);
-    this->sliders[SLIDER_ID_VELOCITY_MIN] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MIN, 30, 135, true);
+    this->sliders[SLIDER_ID_VELOCITY_FIX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_FIX, 20, 45, false);
+    this->sliders[SLIDER_ID_VELOCITY_MAX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MAX, 20, 90, true);
+    this->sliders[SLIDER_ID_VELOCITY_MIN] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MIN, 20, 135, true);
+    this->sliderLabels[SLIDER_ID_VELOCITY_FIX] = this->createLabel(std::string(this->sliderNames[SLIDER_ID_VELOCITY_FIX]) + ":",
+                                                                   300, 45, 50, 40);
+    this->sliderLabels[SLIDER_ID_VELOCITY_MIN] = this->createLabel(std::string(this->sliderNames[SLIDER_ID_VELOCITY_MIN]) + ":",
+                                                                   300, 90, 50, 40);
+    this->sliderLabels[SLIDER_ID_VELOCITY_MAX] = this->createLabel(std::string(this->sliderNames[SLIDER_ID_VELOCITY_MAX]) + ":",
+                                                                   300, 135, 50, 40);
+    // this->textEdits[SLIDER_ID_VELOCITY_FIX] = this->createTextEdit(PARAM_ID_VELOCITY_FIX, 200, 45, 80, 30, 18, false, kCenterText);
+    // this->textEdits[SLIDER_ID_VELOCITY_MAX] = this->createTextEdit(PARAM_ID_VELOCITY_MAX, 200, 90, 80, 30, 18, false, kCenterText);
+    // this->textEdits[SLIDER_ID_VELOCITY_MIN] = this->createTextEdit(PARAM_ID_VELOCITY_MIN, 200, 135, 80, 30, 18, false, kCenterText);
 
     return true;
 }
@@ -52,13 +61,19 @@ void VelocityGUIEditor::valueChanged(CControl* control){
 
     if(paramId == PARAM_ID_TYPE){
         if(static_cast<CorrectTypeID>(index) == CORRECT_TYPE_FIX){
-            this->lockSlider(this->sliders[SLIDER_ID_VELOCITY_FIX], false);
-            this->lockSlider(this->sliders[SLIDER_ID_VELOCITY_MIN], true);
-            this->lockSlider(this->sliders[SLIDER_ID_VELOCITY_MAX], true);
+            this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_FIX], false);
+            this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MIN], true);
+            this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MAX], true);
+            this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_FIX], false);
+            this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MIN], true);
+            this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MAX], true);
         }else{
-            this->lockSlider(this->sliders[SLIDER_ID_VELOCITY_FIX], true);
-            this->lockSlider(this->sliders[SLIDER_ID_VELOCITY_MIN], false);
-            this->lockSlider(this->sliders[SLIDER_ID_VELOCITY_MAX], false);
+            this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_FIX], true);
+            this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MIN], false);
+            this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MAX], false);
+            this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_FIX], true);
+            this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MIN], false);
+            this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MAX], false);
         }
     }
 
@@ -66,13 +81,13 @@ void VelocityGUIEditor::valueChanged(CControl* control){
     this->controller->performEdit(paramId, value);
 }
 
-void VelocityGUIEditor::lockSlider(CHorizontalSlider* slider, bool isLock){
-    slider->setMouseEnabled(!isLock);
-    slider->setAlphaValue(isLock? 0.2: 1.0);
+CTextLabel* VelocityGUIEditor::createLabel(std::string text, uint16 x, uint16 y, uint16 w, uint16 h,
+                                           uint8 fontsize, bool isBold, CHoriTxtAlign align){
+    return this->createLabel(text.c_str(), x, y, w, h, fontsize, isBold, align);
 }
 
 CTextLabel* VelocityGUIEditor::createLabel(UTF8StringPtr text, uint16 x, uint16 y, uint16 w, uint16 h,
-                                    uint8 fontsize, bool isBold, CHoriTxtAlign align){
+                                           uint8 fontsize, bool isBold, CHoriTxtAlign align){
     CRect size(0, 0, w, h);
     size.offset(x, y);
 
@@ -91,6 +106,10 @@ CTextLabel* VelocityGUIEditor::createLabel(UTF8StringPtr text, uint16 x, uint16 
     frame->addView(label);
 
     return label;
+}
+
+void VelocityGUIEditor::lockLabel(CTextLabel* label, bool isLock){
+    label->setAlphaValue(isLock? 0.2: 1.0);
 }
 
 COptionMenu* VelocityGUIEditor::createCombobox(ParamID tag, std::vector<UTF8StringPtr> items,
@@ -138,11 +157,40 @@ CHorizontalSlider* VelocityGUIEditor::createHorizontalSlider(ParamID tag, uint16
     sliderHandle->forget();
 
     if(isLock){
-        this->lockSlider(slider, true);
+        this->lockHorizontalSlider(slider, true);
     }
 
     return slider;
 }
+
+void VelocityGUIEditor::lockHorizontalSlider(CHorizontalSlider* slider, bool isLock){
+    slider->setMouseEnabled(!isLock);
+    slider->setAlphaValue(isLock? 0.2: 1.0);
+}
+
+
+// CTextEdit* VelocityGUIEditor::createTextEdit(ParamID tag, uint16 x, uint16 y, uint16 w, uint16 h,
+//                                              uint8 fontsize, bool isBold, CHoriTxtAlign align){
+//     CRect size(0, 0, w, h);
+//     size.offset(x, y);
+
+//     CFontDesc* font = new CFontDesc("Consolas", fontsize, isBold? kBoldFace: kNormalFace);
+//     CTextEdit* textEdit = new CTextEdit(size, this, tag);
+
+//     textEdit->setFont(font);
+//     textEdit->setHoriAlign(align);
+//     textEdit->setBackColor(kTransparentCColor);
+//     #ifdef DEBUG_GUIEDITOR
+//         textEdit->setFrameColor(kWhiteCColor);
+//     #else
+//         textEdit->setFrameColor(kTransparentCColor);
+//     #endif
+//     textEdit->setText(...);  // TODO
+
+//     frame->addView(textEdit);
+
+//     return textEdit;
+// }
 
 
 } }
