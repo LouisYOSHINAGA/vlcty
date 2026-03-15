@@ -7,9 +7,10 @@ namespace Steinberg {
 namespace Vst {
 
 
-VelocityGUIEditor::VelocityGUIEditor(EditController* controller):
-    VSTGUIEditor(controller){
-    ViewRect viewRect(0, 0, this->BG_WIDTH, this->BG_HEIGHT);
+VelocityGUIEditor::VelocityGUIEditor(EditController* controller)
+    : VSTGUIEditor(controller)
+    , sliders{}, sliderLabels{}, textEdits{}{
+    ViewRect viewRect(0, 0, this->backgroundWidth, this->backgroundHeight);
     setRect(viewRect);
 }
 
@@ -18,7 +19,7 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
         return false;
     }
 
-    CRect size(0, 0, this->BG_WIDTH, this->BG_HEIGHT);  // configure frame size
+    CRect size(0, 0, this->backgroundWidth, this->backgroundHeight);  // frame size
     frame = new CFrame(size, this);  // create frame
     if(frame == nullptr){
         return false;
@@ -31,8 +32,9 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
     cbmp->forget();  // release background image
 
     // controls
-    this->createLabel(MYVST_VSTNAME, 25, 0, 150, 45, false, 18, true);
-    this->createCombobox(PARAM_ID_TYPE, correctTypeNames, 200, 10, 80, 30, 18, false, kCenterText);
+    this->createLabel(MYVST_VSTNAME, 25, 0, 150, 45, false, this->defaultFontsize, true);
+    this->createCombobox(PARAM_ID_TYPE, correctTypeNames, 200, 10, 80, 30,
+                         this->defaultFontsize, false, kCenterText);
 
     this->sliders[SLIDER_ID_VELOCITY_FIX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_FIX, 20, 45, false);
     this->sliders[SLIDER_ID_VELOCITY_MAX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MAX, 20, 90, true);

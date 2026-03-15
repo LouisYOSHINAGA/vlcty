@@ -5,21 +5,21 @@
 #include <vector>
 
 
-typedef enum{
+enum ParamID {
     PARAM_ID_TYPE,
     PARAM_ID_VELOCITY_FIX,
     PARAM_ID_VELOCITY_MIN,
     PARAM_ID_VELOCITY_MAX,
     N_PARAMS
-} ParamID;
+};
 
 
-typedef enum{
+enum CorrectTypeID {
     CORRECT_TYPE_FIX,
     CORRECT_TYPE_REMAP,
     CORRECT_TYPE_CLIP,
     N_CORRECT_TYPES
-} CorrectTypeID;
+};
 
 inline std::vector<VSTGUI::UTF8StringPtr> correctTypeNames = {
     "Fix",

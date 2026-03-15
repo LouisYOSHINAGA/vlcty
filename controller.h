@@ -9,7 +9,7 @@ namespace Steinberg {
 namespace Vst {
 
 
-class VelocityStepParameter: public RangeParameter{
+class VelocityStepParameter: public RangeParameter {
     public:
         VelocityStepParameter(
             const TChar* title, ParamID tag,
