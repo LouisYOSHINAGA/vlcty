@@ -14,7 +14,7 @@ class VelocityStepParameter: public RangeParameter{
         VelocityStepParameter(
             const TChar* title, ParamID tag,
             int32 stepCount = N_VELOCITY_STEPS-1, ParamValue defaultValuePlain = DEFAULT_VELOCITY,
-            ParamValue minPlain = 0, ParamValue maxPlain = N_VELOCITY_STEPS-1,
+            ParamValue minPlain = MIN_VELOCITY, ParamValue maxPlain = MAX_VELOCITY,
             int32 flags = ParameterInfo::kCanAutomate, const TChar* units = nullptr, UnitID unitID = kRootUnitId
         ): RangeParameter(title, tag, units, minPlain, maxPlain, defaultValuePlain, stepCount, flags, unitID){
             this->setPrecision(0);

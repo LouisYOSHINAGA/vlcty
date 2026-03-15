@@ -47,8 +47,9 @@ class VelocityGUIEditor : public VSTGUIEditor,
                                     uint8 = DEFAULT_FONTSIZE, bool = false, CHoriTxtAlign = kLeftText);
         CHorizontalSlider* createHorizontalSlider(ParamID, uint16, uint16, bool = false);
         void lockHorizontalSlider(CHorizontalSlider*, bool = true);
-        // CTextEdit* createTextEdit(ParamID, uint16, uint16, uint16, uint16,
-        //                           uint8 = DEFAULT_FONTSIZE, bool = false, CHoriTxtAlign = kLeftText);
+        CTextEdit* createTextEdit(ParamID, uint16, uint16, uint16, uint16,
+                                  bool = false, uint8 = DEFAULT_FONTSIZE, bool = false, CHoriTxtAlign = kLeftText);
+        void lockTextEdit(CTextEdit*, bool = true);
     public:
         VelocityGUIEditor(EditController*);
         virtual bool PLUGIN_API open(void*, const PlatformType& = PlatformType::kDefaultNative);

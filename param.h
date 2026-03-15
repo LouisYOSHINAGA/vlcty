@@ -29,4 +29,6 @@ inline std::vector<VSTGUI::UTF8StringPtr> correctTypeNames = {
 
 
 constexpr Steinberg::uint8 N_VELOCITY_STEPS = 128;
+constexpr Steinberg::uint8 MIN_VELOCITY = 0;
+constexpr Steinberg::uint8 MAX_VELOCITY = N_VELOCITY_STEPS - 1;
 constexpr Steinberg::uint8 DEFAULT_VELOCITY = 64;

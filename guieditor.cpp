@@ -40,9 +40,9 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
                                                                    300, 90, 50, 40);
     this->sliderLabels[SLIDER_ID_VELOCITY_MAX] = this->createLabel(std::string(this->sliderNames[SLIDER_ID_VELOCITY_MAX]) + ":",
                                                                    300, 135, 50, 40);
-    // this->textEdits[SLIDER_ID_VELOCITY_FIX] = this->createTextEdit(PARAM_ID_VELOCITY_FIX, 200, 45, 80, 30, 18, false, kCenterText);
-    // this->textEdits[SLIDER_ID_VELOCITY_MAX] = this->createTextEdit(PARAM_ID_VELOCITY_MAX, 200, 90, 80, 30, 18, false, kCenterText);
-    // this->textEdits[SLIDER_ID_VELOCITY_MIN] = this->createTextEdit(PARAM_ID_VELOCITY_MIN, 200, 135, 80, 30, 18, false, kCenterText);
+    this->textEdits[SLIDER_ID_VELOCITY_FIX] = this->createTextEdit(PARAM_ID_VELOCITY_FIX, 350, 45, 50, 40, false);
+    this->textEdits[SLIDER_ID_VELOCITY_MAX] = this->createTextEdit(PARAM_ID_VELOCITY_MAX, 350, 90, 50, 40, true);
+    this->textEdits[SLIDER_ID_VELOCITY_MIN] = this->createTextEdit(PARAM_ID_VELOCITY_MIN, 350, 135, 50, 40, true);
 
     return true;
 }
@@ -59,22 +59,42 @@ void VelocityGUIEditor::valueChanged(CControl* control){
     int8 index = control->getValue();
     float value = control->getValueNormalized();
 
-    if(paramId == PARAM_ID_TYPE){
-        if(static_cast<CorrectTypeID>(index) == CORRECT_TYPE_FIX){
-            this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_FIX], false);
-            this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MIN], true);
-            this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MAX], true);
-            this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_FIX], false);
-            this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MIN], true);
-            this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MAX], true);
-        }else{
-            this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_FIX], true);
-            this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MIN], false);
-            this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MAX], false);
-            this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_FIX], true);
-            this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MIN], false);
-            this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MAX], false);
-        }
+    switch(paramId){
+        case PARAM_ID_TYPE:
+            if(static_cast<CorrectTypeID>(index) == CORRECT_TYPE_FIX){
+                this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_FIX], false);
+                this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MIN], true);
+                this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MAX], true);
+                this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_FIX], false);
+                this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MIN], true);
+                this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MAX], true);
+                this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_FIX], false);
+                this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_MIN], true);
+                this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_MAX], true);
+            }else{
+                this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_FIX], true);
+                this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MIN], false);
+                this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MAX], false);
+                this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_FIX], true);
+                this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MIN], false);
+                this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MAX], false);
+                this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_FIX], true);
+                this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_MIN], false);
+                this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_MAX], false);
+            }
+            break;
+        case PARAM_ID_VELOCITY_FIX:
+            this->textEdits[SLIDER_ID_VELOCITY_FIX]->setText(std::to_string(static_cast<uint8>(value * MAX_VELOCITY)).c_str());
+            break;
+        case PARAM_ID_VELOCITY_MIN:
+            this->textEdits[SLIDER_ID_VELOCITY_MIN]->setText(std::to_string(static_cast<uint8>(value * MAX_VELOCITY)).c_str());
+            break;
+        case PARAM_ID_VELOCITY_MAX:
+            this->textEdits[SLIDER_ID_VELOCITY_MAX]->setText(std::to_string(static_cast<uint8>(value * MAX_VELOCITY)).c_str());
+            break;
+        default:
+            // do nothing
+            break;
     }
 
     this->controller->setParamNormalized(paramId, value);
@@ -142,23 +162,23 @@ CHorizontalSlider* VelocityGUIEditor::createHorizontalSlider(ParamID tag, uint16
     CRect size(0, 0, sliderBackground->getWidth(), sliderHandle->getHeight());
     size.offset(x, y);
 
+    CPoint trackOffset(0, -(sliderHandle->getHeight()-sliderBackground->getHeight())/2);
     CHorizontalSlider* slider = new CHorizontalSlider(size, this, tag,
                                                       x, x+sliderBackground->getWidth()-sliderHandle->getWidth(),
                                                       sliderHandle, sliderBackground);
+
     slider->setStyle(CSlider::kLeft | CSlider::kHorizontal);
-
-    CPoint trackOffset(0, -(sliderHandle->getHeight()-sliderBackground->getHeight())/2);
     slider->setBackgroundOffset(trackOffset);
-
     slider->setValueNormalized(this->controller->getParamNormalized(tag));
-    frame->addView(slider);
 
-    sliderBackground->forget();
-    sliderHandle->forget();
+    frame->addView(slider);
 
     if(isLock){
         this->lockHorizontalSlider(slider, true);
     }
+
+    sliderBackground->forget();
+    sliderHandle->forget();
 
     return slider;
 }
@@ -168,29 +188,41 @@ void VelocityGUIEditor::lockHorizontalSlider(CHorizontalSlider* slider, bool isL
     slider->setAlphaValue(isLock? 0.2: 1.0);
 }
 
+CTextEdit* VelocityGUIEditor::createTextEdit(ParamID tag, uint16 x, uint16 y, uint16 w, uint16 h,
+                                             bool isLock, uint8 fontsize, bool isBold, CHoriTxtAlign align){
+    CRect size(0, 0, w, h);
+    size.offset(x, y);
 
-// CTextEdit* VelocityGUIEditor::createTextEdit(ParamID tag, uint16 x, uint16 y, uint16 w, uint16 h,
-//                                              uint8 fontsize, bool isBold, CHoriTxtAlign align){
-//     CRect size(0, 0, w, h);
-//     size.offset(x, y);
+    CFontDesc* font = new CFontDesc("Consolas", fontsize, isBold? kBoldFace: kNormalFace);
+    CTextEdit* textEdit = new CTextEdit(size, this, tag);
 
-//     CFontDesc* font = new CFontDesc("Consolas", fontsize, isBold? kBoldFace: kNormalFace);
-//     CTextEdit* textEdit = new CTextEdit(size, this, tag);
+    textEdit->setFont(font);
+    textEdit->setHoriAlign(align);
+    textEdit->setBackColor(kTransparentCColor);
+    #ifdef DEBUG_GUIEDITOR
+        textEdit->setFrameColor(kWhiteCColor);
+    #else
+        textEdit->setFrameColor(kTransparentCColor);
+    #endif
+    textEdit->setText(
+        std::string(
+            std::to_string(static_cast<uint8>(this->controller->getParamNormalized(tag) * MAX_VELOCITY))
+        ).c_str()
+    );
 
-//     textEdit->setFont(font);
-//     textEdit->setHoriAlign(align);
-//     textEdit->setBackColor(kTransparentCColor);
-//     #ifdef DEBUG_GUIEDITOR
-//         textEdit->setFrameColor(kWhiteCColor);
-//     #else
-//         textEdit->setFrameColor(kTransparentCColor);
-//     #endif
-//     textEdit->setText(...);  // TODO
+    frame->addView(textEdit);
+    
+    if(isLock){
+        this->lockTextEdit(textEdit, true);
+    }
 
-//     frame->addView(textEdit);
+    return textEdit;
+}
 
-//     return textEdit;
-// }
+void VelocityGUIEditor::lockTextEdit(CTextEdit* textEdit, bool isLock){
+    textEdit->setMouseEnabled(!isLock);
+    textEdit->setAlphaValue(isLock? 0.2: 1.0);
+}
 
 
 } }
