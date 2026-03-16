@@ -17,6 +17,15 @@ tresult PLUGIN_API VelocityController::initialize(FUnknown* context){
         return result;
     }
 
+    StringListParameter* correctType = new StringListParameter(
+        STR16("Correct Type"),  // title
+        PARAM_ID_CORRECT_TYPE  // tag
+    );
+    correctType->appendString(STR16("Fix"));
+    correctType->appendString(STR16("Remap"));
+    correctType->appendString(STR16("Clip"));
+    parameters.addParameter(correctType);
+
     VelocityStepParameter* velocityFix = new VelocityStepParameter(
         STR16("Velocity Fix"),  // title
         PARAM_ID_VELOCITY_FIX  // tag

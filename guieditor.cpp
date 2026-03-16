@@ -33,12 +33,12 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
 
     // controls
     this->createLabel(MYVST_VSTNAME, 25, 0, 150, 45, false, this->defaultFontsize, true);
-    this->createCombobox(PARAM_ID_TYPE, correctTypeNames, 200, 10, 80, 30,
+    this->createCombobox(PARAM_ID_CORRECT_TYPE, correctTypeNames, 200, 10, 80, 30,
                          this->defaultFontsize, false, kCenterText);
 
     this->sliders[SLIDER_ID_VELOCITY_FIX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_FIX, 25, 45, false);
-    this->sliders[SLIDER_ID_VELOCITY_MAX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MAX, 25, 90, true);
-    this->sliders[SLIDER_ID_VELOCITY_MIN] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MIN, 25, 135, true);
+    this->sliders[SLIDER_ID_VELOCITY_MIN] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MIN, 25, 90, true);
+    this->sliders[SLIDER_ID_VELOCITY_MAX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MAX, 25, 135, true);
 
     this->sliderLabels[SLIDER_ID_VELOCITY_FIX] = this->createLabel(
         std::string(this->sliderNames[SLIDER_ID_VELOCITY_FIX]) + ":", 305, 45, 50, 40, false
@@ -51,8 +51,8 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
     );
 
     this->textEdits[SLIDER_ID_VELOCITY_FIX] = this->createTextEdit(PARAM_ID_VELOCITY_FIX, 350, 45, 50, 40, false);
-    this->textEdits[SLIDER_ID_VELOCITY_MAX] = this->createTextEdit(PARAM_ID_VELOCITY_MAX, 350, 90, 50, 40, true);
-    this->textEdits[SLIDER_ID_VELOCITY_MIN] = this->createTextEdit(PARAM_ID_VELOCITY_MIN, 350, 135, 50, 40, true);
+    this->textEdits[SLIDER_ID_VELOCITY_MIN] = this->createTextEdit(PARAM_ID_VELOCITY_MIN, 350, 90, 50, 40, true);
+    this->textEdits[SLIDER_ID_VELOCITY_MAX] = this->createTextEdit(PARAM_ID_VELOCITY_MAX, 350, 135, 50, 40, true);
     for(int8 i = 0; i < N_SLIDERS; i++){
         this->textEdits[i]->setStringToValueFunction(&VelocityGUIEditor::parseInputText);
     }
@@ -69,18 +69,23 @@ void PLUGIN_API VelocityGUIEditor::close(){
 
 void VelocityGUIEditor::valueChanged(CControl* control){
     int8 paramId = control->getTag();
-    int8 index = control->getValue();
     float value = control->getValueNormalized();
 
     switch(paramId){
-        case PARAM_ID_TYPE:
+        case PARAM_ID_CORRECT_TYPE:
             bool isLockFix, isLockMin, isLockMax;
-            if(static_cast<CorrectTypeID>(index) == CORRECT_TYPE_FIX){  // fix
-                isLockFix = false;
-                isLockMin = isLockMax = true;
-            }else{  // remap, clip
-                isLockFix = true;
-                isLockMin = isLockMax = false;
+            switch(static_cast<CorrectTypeID>(value * (N_CORRECT_TYPES - 1) + EPSILON)){
+                case CORRECT_TYPE_FIX:
+                    isLockFix = false;
+                    isLockMin = isLockMax = true;
+                    break;
+                case CORRECT_TYPE_REMAP:
+                case CORRECT_TYPE_CLIP:
+                    isLockFix = true;
+                    isLockMin = isLockMax = false;
+                    break;
+                default:
+                    break;
             }
 
             this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_FIX], isLockFix);

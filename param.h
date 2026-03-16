@@ -5,8 +5,11 @@
 #include <vector>
 
 
+constexpr float EPSILON = 1e-5f;
+
+
 enum ParamID {
-    PARAM_ID_TYPE,
+    PARAM_ID_CORRECT_TYPE,
     PARAM_ID_VELOCITY_FIX,
     PARAM_ID_VELOCITY_MIN,
     PARAM_ID_VELOCITY_MAX,

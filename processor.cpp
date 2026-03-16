@@ -1,6 +1,5 @@
 #include "processor.h"
 #include "config.h"
-#include "param.h"
 
 
 namespace Steinberg {
@@ -11,9 +10,12 @@ FUnknown* VelocityProcessor::createInstance(void*){
     return (IAudioProcessor*)new VelocityProcessor();
 }
 
-VelocityProcessor::VelocityProcessor(){
+VelocityProcessor::VelocityProcessor()
+    : correctType(CORRECT_TYPE_FIX)
+    , fixVelocity(static_cast<float>(DEFAULT_VELOCITY) / N_VELOCITY_STEPS)
+    , minVelocity(static_cast<float>(DEFAULT_VELOCITY) / N_VELOCITY_STEPS)
+    , maxVelocity(static_cast<float>(DEFAULT_VELOCITY) / N_VELOCITY_STEPS){
     setControllerClass(ControllerUID);
-    this->velocity = DEFAULT_VELOCITY;
 }
 
 tresult PLUGIN_API VelocityProcessor::initialize(FUnknown* context){
@@ -29,7 +31,8 @@ tresult PLUGIN_API VelocityProcessor::initialize(FUnknown* context){
     return result;
 }
 
-tresult PLUGIN_API VelocityProcessor::setBusArrangements(SpeakerArrangement* inputs, int32 numIns, SpeakerArrangement* outputs, int32 numOuts){
+tresult PLUGIN_API VelocityProcessor::setBusArrangements(SpeakerArrangement* inputs, int32 numIns,
+                                                         SpeakerArrangement* outputs, int32 numOuts){
     if(numOuts == 1 && outputs[0] == SpeakerArr::kStereo){
         return AudioEffect::setBusArrangements(inputs, numIns, outputs, numOuts);
     }
@@ -58,17 +61,19 @@ void VelocityProcessor::processParameter(ProcessData& data){
             continue;
         }
         switch(queue->getParameterId()){
-            case PARAM_ID_TYPE:
-                // TODO impl
+            case PARAM_ID_CORRECT_TYPE:
+                this->correctType = static_cast<CorrectTypeID>(
+                    static_cast<int8>(value * (N_CORRECT_TYPES - 1) + EPSILON)
+                );
                 break;
             case PARAM_ID_VELOCITY_FIX:
-                this->velocity = value;
+                this->fixVelocity = value;
                 break;
             case PARAM_ID_VELOCITY_MIN:
-                // TODO impl
+                this->minVelocity = value;
                 break;
             case PARAM_ID_VELOCITY_MAX:
-                // TODO impl
+                this->maxVelocity = value;
                 break;
             default:
                 // do nothing
@@ -111,7 +116,27 @@ void VelocityProcessor::applyVelocityFix(NoteOnEvent* noteOnEvent){
     if(noteOnEvent->velocity == 0){  // note off with velocity 0
         return;  // do nothing
     }
-    noteOnEvent->velocity = this->velocity;
+
+    switch(this->correctType){
+        case CORRECT_TYPE_FIX:
+            noteOnEvent->velocity = this->fixVelocity;
+            break;
+        case CORRECT_TYPE_REMAP:
+            // TODO impl
+            break;
+        case CORRECT_TYPE_CLIP:
+            if(this->minVelocity > this->maxVelocity){  // invalid setting
+                noteOnEvent->velocity = 0;
+            }else if(noteOnEvent->velocity < this->minVelocity){
+                noteOnEvent->velocity = this->minVelocity;
+            }else if(this->maxVelocity < noteOnEvent->velocity){
+                noteOnEvent->velocity = this->maxVelocity;
+            }
+            break;
+        default:
+            // do nothing
+            break;
+    }
 }
 
 

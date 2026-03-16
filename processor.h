@@ -3,6 +3,7 @@
 #include "public.sdk/source/vst/vstaudioeffect.h"
 #include "pluginterfaces/vst/ivstparameterchanges.h"
 #include "pluginterfaces/vst/ivstevents.h"
+#include "param.h"
 
 
 namespace Steinberg {
@@ -14,7 +15,10 @@ constexpr int8 NUM_EVENT_CHANNELS = 1;
 
 class VelocityProcessor: public AudioEffect {
     private:
-       float velocity;
+        ParamID correctType;
+        float fixVelocity;
+        float minVelocity;
+        float maxVelocity;
     public:
         static FUnknown* createInstance(void*);
         VelocityProcessor();
