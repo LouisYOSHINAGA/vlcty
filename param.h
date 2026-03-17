@@ -18,6 +18,7 @@ enum ParamID {
 
 
 enum CorrectTypeID {
+    CORRECT_TYPE_THROUGH,
     CORRECT_TYPE_FIX,
     CORRECT_TYPE_REMAP,
     CORRECT_TYPE_CLIP,
@@ -25,6 +26,7 @@ enum CorrectTypeID {
 };
 
 inline std::vector<VSTGUI::UTF8StringPtr> correctTypeNames = {
+    "Through",
     "Fix",
     "Remap",
     "Clip"

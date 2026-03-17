@@ -11,7 +11,7 @@ FUnknown* VelocityProcessor::createInstance(void*){
 }
 
 VelocityProcessor::VelocityProcessor()
-    : correctType(CORRECT_TYPE_FIX)
+    : correctType(CORRECT_TYPE_THROUGH)
     , fixVelocity(static_cast<float>(DEFAULT_VELOCITY) / N_VELOCITY_STEPS)
     , minVelocity(static_cast<float>(DEFAULT_VELOCITY) / N_VELOCITY_STEPS)
     , maxVelocity(static_cast<float>(DEFAULT_VELOCITY) / N_VELOCITY_STEPS){
@@ -118,6 +118,9 @@ void VelocityProcessor::applyVelocityFix(NoteOnEvent* noteOnEvent){
     }
 
     switch(this->correctType){
+        case CORRECT_TYPE_THROUGH:
+            // do nothing
+            break;
         case CORRECT_TYPE_FIX:
             noteOnEvent->velocity = this->fixVelocity;
             break;
