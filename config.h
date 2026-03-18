@@ -8,7 +8,7 @@
 #define MYVST_VENDOR "Nareshika Works"
 #define MYVST_URL "https://github.com/LouisYOSHINAGA/vlcty"
 #define MYVST_EMAIL "mailto:9dutat.e@gmail.com"
-#define MYVST_VSTNAME "Velocity Fixer"
+#define MYVST_VSTNAME "VlctyCrrctr"
 #define MYVST_VERSION  "0"
 #define MYVST_SUBCATEGORIES Vst::PlugType::kInstrumentSynth
 

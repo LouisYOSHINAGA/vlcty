@@ -32,27 +32,28 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
     cbmp->forget();  // release background image
 
     // controls
-    this->createLabel(MYVST_VSTNAME, 25, 0, 150, 45, false, this->defaultFontsize, true);
-    this->createCombobox(PARAM_ID_CORRECT_TYPE, correctTypeNames, 200, 10, 80, 30,
+    this->createLabel(MYVST_VSTNAME, 30, 0, 130, 45, false, this->defaultFontsize+2, true, kCenterText);
+    this->createCombobox(PARAM_ID_CORRECT_TYPE, correctTypeNames, 170, 7.5, 90, 30,
                          this->defaultFontsize, false, kCenterText);
+    this->createLabel("", 270, 0, 110, 45, false, this->defaultFontsize, false, kCenterText);
 
     this->sliders[SLIDER_ID_VELOCITY_FIX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_FIX, 25, 45);
     this->sliders[SLIDER_ID_VELOCITY_MIN] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MIN, 25, 90);
     this->sliders[SLIDER_ID_VELOCITY_MAX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MAX, 25, 135);
 
     this->sliderLabels[SLIDER_ID_VELOCITY_FIX] = this->createLabel(
-        std::string(this->sliderNames[SLIDER_ID_VELOCITY_FIX]) + ":", 305, 45, 50, 40
+        std::string(this->sliderNames[SLIDER_ID_VELOCITY_FIX]) + ":", 305, 45, 40, 40
     );
     this->sliderLabels[SLIDER_ID_VELOCITY_MIN] = this->createLabel(
-        std::string(this->sliderNames[SLIDER_ID_VELOCITY_MIN]) + ":", 305, 90, 50, 40
+        std::string(this->sliderNames[SLIDER_ID_VELOCITY_MIN]) + ":", 305, 90, 40, 40
     );
     this->sliderLabels[SLIDER_ID_VELOCITY_MAX] = this->createLabel(
-        std::string(this->sliderNames[SLIDER_ID_VELOCITY_MAX]) + ":", 305, 135, 50, 40
+        std::string(this->sliderNames[SLIDER_ID_VELOCITY_MAX]) + ":", 305, 135, 40, 40
     );
 
-    this->textEdits[SLIDER_ID_VELOCITY_FIX] = this->createTextEdit(PARAM_ID_VELOCITY_FIX, 350, 45, 50, 40);
-    this->textEdits[SLIDER_ID_VELOCITY_MIN] = this->createTextEdit(PARAM_ID_VELOCITY_MIN, 350, 90, 50, 40);
-    this->textEdits[SLIDER_ID_VELOCITY_MAX] = this->createTextEdit(PARAM_ID_VELOCITY_MAX, 350, 135, 50, 40);
+    this->textEdits[SLIDER_ID_VELOCITY_FIX] = this->createTextEdit(PARAM_ID_VELOCITY_FIX, 350, 45, 40, 40);
+    this->textEdits[SLIDER_ID_VELOCITY_MIN] = this->createTextEdit(PARAM_ID_VELOCITY_MIN, 350, 90, 40, 40);
+    this->textEdits[SLIDER_ID_VELOCITY_MAX] = this->createTextEdit(PARAM_ID_VELOCITY_MAX, 350, 135, 40, 40);
     for(int8 i = 0; i < N_SLIDERS; i++){
         this->textEdits[i]->setStringToValueFunction(&VelocityGUIEditor::parseInputText);
     }
