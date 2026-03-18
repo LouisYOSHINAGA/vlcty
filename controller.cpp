@@ -44,6 +44,29 @@ tresult PLUGIN_API VelocityController::initialize(FUnknown* context){
     );
     parameters.addParameter(velocityMax);
 
+    VelocityStepParameter* inputVelocity = new VelocityStepParameter(
+        STR16("Input Velocity"),  // title
+        PARAM_ID_INPUT_VELOCITY,  // tag
+        N_VELOCITY_STEPS-1,  // step count
+        DEFAULT_VELOCITY,  // default value plain
+        MIN_VELOCITY,  // min plain
+        MAX_VELOCITY,  // max plain
+        ParameterInfo::kIsReadOnly|ParameterInfo::kIsHidden  // flags
+    );
+    parameters.addParameter(inputVelocity);
+
+    VelocityStepParameter* outputVelocity = new VelocityStepParameter(
+        STR16("Output Velocity"),  // title
+        PARAM_ID_INPUT_VELOCITY,  // tag
+        N_VELOCITY_STEPS-1,  // step count
+        DEFAULT_VELOCITY,  // default value plain
+        MIN_VELOCITY,  // min plain
+        MAX_VELOCITY,  // max plain
+        ParameterInfo::kIsReadOnly|ParameterInfo::kIsHidden  // flags
+    );
+    parameters.addParameter(outputVelocity);
+
+
     return result;
 }
 
