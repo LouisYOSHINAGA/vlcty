@@ -23,9 +23,13 @@ class VelocityStepParameter: public RangeParameter {
 
 
 class VelocityController: public EditController {
+    protected:
+        VelocityGUIEditor* velocityGUIEditor;
     public:
         static FUnknown* createInstance(void*);
+        VelocityController();
         tresult PLUGIN_API initialize(FUnknown*);
+        tresult PLUGIN_API setParamNormalized(ParamID, ParamValue);
         IPlugView* PLUGIN_API createView(const char*);
 };
 

@@ -10,6 +10,8 @@ FUnknown* VelocityController::createInstance(void*){
     return (IEditController*)new VelocityController();
 }
 
+VelocityController::VelocityController(): velocityGUIEditor(nullptr){
+}
 
 tresult PLUGIN_API VelocityController::initialize(FUnknown* context){
     tresult result = EditController::initialize(context);
@@ -57,7 +59,7 @@ tresult PLUGIN_API VelocityController::initialize(FUnknown* context){
 
     VelocityStepParameter* outputVelocity = new VelocityStepParameter(
         STR16("Output Velocity"),  // title
-        PARAM_ID_INPUT_VELOCITY,  // tag
+        PARAM_ID_OUTPUT_VELOCITY,  // tag
         N_VELOCITY_STEPS-1,  // step count
         DEFAULT_VELOCITY,  // default value plain
         MIN_VELOCITY,  // min plain
@@ -70,10 +72,37 @@ tresult PLUGIN_API VelocityController::initialize(FUnknown* context){
     return result;
 }
 
+tresult PLUGIN_API VelocityController::setParamNormalized(ParamID tag, ParamValue value){
+    EditController::setParamNormalized(tag, value);
+    if(this->velocityGUIEditor == nullptr){  // in case GUI is closed
+        return kResultOk;
+    }
+
+    switch(tag){
+        case PARAM_ID_INPUT_VELOCITY:
+            // do nothing
+            // GUI is updated in PARAM_ID_OUTPUT_VELOCITY
+            // because output velocity is always updated after input velocity
+            // the latest input velocity is retrievable using getParamNormalized()
+            break;
+        case PARAM_ID_OUTPUT_VELOCITY:
+            this->velocityGUIEditor->updateVelocityLabel(
+                this->getParamNormalized(PARAM_ID_INPUT_VELOCITY),  // input velocity
+                value  // output velocity
+            );
+            break;
+        default:
+            // do nothing
+            break;
+    }
+
+    return kResultOk;
+}
+
 IPlugView* PLUGIN_API VelocityController::createView(const char* name){
     if(strcmp(name, "editor") == 0){
-        VelocityGUIEditor* view = new VelocityGUIEditor(this);
-        return view;
+        this->velocityGUIEditor = new VelocityGUIEditor(this);
+        return this->velocityGUIEditor;
     }
     return 0;
 }

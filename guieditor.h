@@ -21,6 +21,7 @@ class VelocityGUIEditor : public VSTGUIEditor
         virtual bool PLUGIN_API open(void*, const PlatformType& = PlatformType::kDefaultNative);
         virtual void PLUGIN_API close();
         void valueChanged(CControl*);
+        void updateVelocityLabel(ParamValue, ParamValue);
         DELEGATE_REFCOUNT(VSTGUIEditor)
 
     protected:
@@ -44,6 +45,7 @@ class VelocityGUIEditor : public VSTGUIEditor
         };
 
         // pointers to controls
+        CTextLabel* velocityLabel;
         CHorizontalSlider* sliders[N_SLIDERS];
         CTextLabel* sliderLabels[N_SLIDERS];
         CTextEdit* textEdits[N_SLIDERS];

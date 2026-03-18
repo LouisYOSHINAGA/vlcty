@@ -14,7 +14,9 @@ VelocityProcessor::VelocityProcessor()
     : correctType(CORRECT_TYPE_THROUGH)
     , fixVelocity(static_cast<float>(DEFAULT_VELOCITY) / N_VELOCITY_STEPS)
     , minVelocity(static_cast<float>(DEFAULT_VELOCITY) / N_VELOCITY_STEPS)
-    , maxVelocity(static_cast<float>(DEFAULT_VELOCITY) / N_VELOCITY_STEPS){
+    , maxVelocity(static_cast<float>(DEFAULT_VELOCITY) / N_VELOCITY_STEPS)
+    , inputVelocity(DEFAULT_VELOCITY)
+    , outputVelocity(DEFAULT_VELOCITY){
     setControllerClass(ControllerUID);
 }
 
@@ -41,7 +43,7 @@ tresult PLUGIN_API VelocityProcessor::setBusArrangements(SpeakerArrangement* inp
 
 tresult PLUGIN_API VelocityProcessor::process(ProcessData& data){
     processParameter(data);
-    processEvent(data.inputEvents, data.outputEvents);
+    processEvent(data);
     return kResultTrue;
 }
 
@@ -82,7 +84,10 @@ void VelocityProcessor::processParameter(ProcessData& data){
     }
 }
 
-void VelocityProcessor::processEvent(IEventList* inputEvents, IEventList* outputEvents){
+void VelocityProcessor::processEvent(ProcessData& data){
+    IEventList* inputEvents = data.inputEvents;
+    IEventList* outputEvents = data.outputEvents;
+
     if(inputEvents == nullptr){
         return;
     }
@@ -99,7 +104,14 @@ void VelocityProcessor::processEvent(IEventList* inputEvents, IEventList* output
         }
         switch(event.type){
             case Event::kNoteOnEvent:
-                applyVelocityFix(&(event.noteOn));
+                applyVelocityFix(event.noteOn);
+
+                if(data.outputParameterChanges){
+                    this->sendParameterToController(PARAM_ID_INPUT_VELOCITY, this->inputVelocity,
+                                                    *data.outputParameterChanges, event.sampleOffset);
+                    this->sendParameterToController(PARAM_ID_OUTPUT_VELOCITY, this->outputVelocity,
+                                                    *data.outputParameterChanges, event.sampleOffset);
+                }
                 break;
             case Event::kNoteOffEvent:
                 // do nothing; impl if needed
@@ -112,33 +124,46 @@ void VelocityProcessor::processEvent(IEventList* inputEvents, IEventList* output
     }
 }
 
-void VelocityProcessor::applyVelocityFix(NoteOnEvent* noteOnEvent){
-    if(noteOnEvent->velocity == 0){  // note off with velocity 0
+void VelocityProcessor::applyVelocityFix(NoteOnEvent& noteOnEvent){
+    if(noteOnEvent.velocity == 0){  // note off with velocity 0
         return;  // do nothing
     }
+
+    this->inputVelocity = noteOnEvent.velocity;  // store input velocity
 
     switch(this->correctType){
         case CORRECT_TYPE_THROUGH:
             // do nothing
             break;
         case CORRECT_TYPE_FIX:
-            noteOnEvent->velocity = this->fixVelocity;
+            noteOnEvent.velocity = this->fixVelocity;
             break;
         case CORRECT_TYPE_REMAP:
             // TODO impl
             break;
         case CORRECT_TYPE_CLIP:
             if(this->minVelocity > this->maxVelocity){  // invalid setting
-                noteOnEvent->velocity = 0;
-            }else if(noteOnEvent->velocity < this->minVelocity){
-                noteOnEvent->velocity = this->minVelocity;
-            }else if(this->maxVelocity < noteOnEvent->velocity){
-                noteOnEvent->velocity = this->maxVelocity;
+                noteOnEvent.velocity = 0;
+            }else if(noteOnEvent.velocity < this->minVelocity){
+                noteOnEvent.velocity = this->minVelocity;
+            }else if(this->maxVelocity < noteOnEvent.velocity){
+                noteOnEvent.velocity = this->maxVelocity;
             }
             break;
         default:
             // do nothing
             break;
+    }
+
+    this->outputVelocity = noteOnEvent.velocity;  // store output velocity
+}
+
+void VelocityProcessor::sendParameterToController(ParamID paramId, float rawVelocity,
+                                                  IParameterChanges& outParamChanges, int32 sampleOffset){
+    int32 queueIndex = 0;
+    IParamValueQueue* queue = outParamChanges.addParameterData(paramId, queueIndex);  // plugin -> DAW
+    if(queue){
+        queue->addPoint(sampleOffset, rawVelocity, queueIndex);
     }
 }
 

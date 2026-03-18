@@ -9,6 +9,7 @@ namespace Vst {
 
 VelocityGUIEditor::VelocityGUIEditor(EditController* controller)
     : VSTGUIEditor(controller)
+    , velocityLabel(nullptr)
     , sliders{}, sliderLabels{}, textEdits{}{
     ViewRect viewRect(0, 0, this->backgroundWidth, this->backgroundHeight);
     setRect(viewRect);
@@ -35,7 +36,7 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
     this->createLabel(MYVST_VSTNAME, 30, 0, 130, 45, false, this->defaultFontsize+2, true, kCenterText);
     this->createCombobox(PARAM_ID_CORRECT_TYPE, correctTypeNames, 170, 7.5, 90, 30,
                          this->defaultFontsize, false, kCenterText);
-    this->createLabel("", 270, 0, 110, 45, false, this->defaultFontsize, false, kCenterText);
+    this->velocityLabel = this->createLabel("    ->    ", 270, 0, 110, 45, false, this->defaultFontsize, false, kCenterText);
 
     this->sliders[SLIDER_ID_VELOCITY_FIX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_FIX, 25, 45);
     this->sliders[SLIDER_ID_VELOCITY_MIN] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MIN, 25, 90);
@@ -134,6 +135,21 @@ void VelocityGUIEditor::valueChanged(CControl* control){
     this->controller->setParamNormalized(paramId, value);
     this->controller->performEdit(paramId, value);
 }
+
+void VelocityGUIEditor::updateVelocityLabel(ParamValue rawInputVelocity, ParamValue rawOutputVelocity){
+    if(this->velocityLabel == nullptr){
+        return;
+    }
+
+    char labelText[16];
+    uint8 inputVelocity = static_cast<uint8>(rawInputVelocity * (N_VELOCITY_STEPS - 1) + EPSILON);
+    uint8 outputVelocity = static_cast<uint8>(rawOutputVelocity * (N_VELOCITY_STEPS - 1) + EPSILON);
+
+    snprintf(labelText, sizeof(labelText), "%3d -> %3d", inputVelocity, outputVelocity);
+    this->velocityLabel->setText(labelText);
+    this->velocityLabel->invalid();
+}
+
 
 CTextLabel* VelocityGUIEditor::createLabel(std::string text, uint16 x, uint16 y, uint16 w, uint16 h,
                                            bool isLock, uint8 fontsize, bool isBold, CHoriTxtAlign align){
