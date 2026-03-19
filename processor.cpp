@@ -1,5 +1,6 @@
 #include "processor.h"
 #include "config.h"
+#include <algorithm>
 
 
 namespace Steinberg {
@@ -138,9 +139,12 @@ void VelocityProcessor::applyVelocityFix(NoteOnEvent& noteOnEvent){
         case CORRECT_TYPE_FIX:
             noteOnEvent.velocity = this->fixVelocity;
             break;
-        case CORRECT_TYPE_REMAP:
-            // TODO impl
+        case CORRECT_TYPE_REMAP:{
+            float v = (noteOnEvent.velocity - DEFACTO_MIN_VELOCITY) / (1.0 - DEFACTO_MIN_VELOCITY);
+            v = std::clamp(v, 0.0f, 1.0f);
+            noteOnEvent.velocity = this->minVelocity + v * (this->maxVelocity - this->minVelocity);
             break;
+        }
         case CORRECT_TYPE_CLIP:
             if(this->minVelocity > this->maxVelocity){  // invalid setting
                 noteOnEvent.velocity = 0;
