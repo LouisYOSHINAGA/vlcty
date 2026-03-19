@@ -23,6 +23,7 @@ tresult PLUGIN_API VelocityController::initialize(FUnknown* context){
         STR16("Correct Type"),  // title
         PARAM_ID_CORRECT_TYPE  // tag
     );
+    correctType->appendString(STR16("Through"));
     correctType->appendString(STR16("Fix"));
     correctType->appendString(STR16("Remap"));
     correctType->appendString(STR16("Clip"));
@@ -80,16 +81,10 @@ tresult PLUGIN_API VelocityController::setParamNormalized(ParamID tag, ParamValu
 
     switch(tag){
         case PARAM_ID_INPUT_VELOCITY:
-            // do nothing
-            // GUI is updated in PARAM_ID_OUTPUT_VELOCITY
-            // because output velocity is always updated after input velocity
-            // the latest input velocity is retrievable using getParamNormalized()
+            this->velocityGUIEditor->updateVelocityLabel(value, true);
             break;
         case PARAM_ID_OUTPUT_VELOCITY:
-            this->velocityGUIEditor->updateVelocityLabel(
-                this->getParamNormalized(PARAM_ID_INPUT_VELOCITY),  // input velocity
-                value  // output velocity
-            );
+            this->velocityGUIEditor->updateVelocityLabel(value, false);
             break;
         default:
             // do nothing

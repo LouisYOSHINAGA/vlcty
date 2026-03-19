@@ -21,7 +21,7 @@ class VelocityGUIEditor : public VSTGUIEditor
         virtual bool PLUGIN_API open(void*, const PlatformType& = PlatformType::kDefaultNative);
         virtual void PLUGIN_API close();
         void valueChanged(CControl*);
-        void updateVelocityLabel(ParamValue, ParamValue);
+        void updateVelocityLabel(ParamValue, bool);
         DELEGATE_REFCOUNT(VSTGUIEditor)
 
     protected:
@@ -43,6 +43,10 @@ class VelocityGUIEditor : public VSTGUIEditor
             "Min",
             "Max"
         };
+
+        // cache for velocity label
+        uint8 currentInputVelocity;
+        uint8 currentOutputVelocity;
 
         // pointers to controls
         CTextLabel* velocityLabel;

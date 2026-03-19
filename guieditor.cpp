@@ -9,6 +9,7 @@ namespace Vst {
 
 VelocityGUIEditor::VelocityGUIEditor(EditController* controller)
     : VSTGUIEditor(controller)
+    , currentInputVelocity(DEFAULT_VELOCITY), currentOutputVelocity(DEFAULT_VELOCITY)
     , velocityLabel(nullptr)
     , sliders{}, sliderLabels{}, textEdits{}{
     ViewRect viewRect(0, 0, this->backgroundWidth, this->backgroundHeight);
@@ -136,20 +137,24 @@ void VelocityGUIEditor::valueChanged(CControl* control){
     this->controller->performEdit(paramId, value);
 }
 
-void VelocityGUIEditor::updateVelocityLabel(ParamValue rawInputVelocity, ParamValue rawOutputVelocity){
+void VelocityGUIEditor::updateVelocityLabel(ParamValue rawVelocity, bool isInput){
     if(this->velocityLabel == nullptr){
         return;
     }
 
-    char labelText[16];
-    uint8 inputVelocity = static_cast<uint8>(rawInputVelocity * (N_VELOCITY_STEPS - 1) + EPSILON);
-    uint8 outputVelocity = static_cast<uint8>(rawOutputVelocity * (N_VELOCITY_STEPS - 1) + EPSILON);
+    uint8 velocity = static_cast<uint8>(rawVelocity * (N_VELOCITY_STEPS - 1) + EPSILON);
+    if(isInput){
+        this->currentInputVelocity = velocity;
+    }else{
+        this->currentOutputVelocity = velocity;
+    }
 
-    snprintf(labelText, sizeof(labelText), "%3d -> %3d", inputVelocity, outputVelocity);
+    char labelText[16];
+    snprintf(labelText, sizeof(labelText), "%3d -> %3d",
+             this->currentInputVelocity, this->currentOutputVelocity);
     this->velocityLabel->setText(labelText);
     this->velocityLabel->invalid();
 }
-
 
 CTextLabel* VelocityGUIEditor::createLabel(std::string text, uint16 x, uint16 y, uint16 w, uint16 h,
                                            bool isLock, uint8 fontsize, bool isBold, CHoriTxtAlign align){
