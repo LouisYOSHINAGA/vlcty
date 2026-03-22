@@ -14,12 +14,19 @@ VelocityGUIEditor::CContextMenu::CContextMenu(const CRect& size, VelocityGUIEdit
 
 CMouseEventResult VelocityGUIEditor::CContextMenu::onMouseDown(CPoint& point, const CButtonState& buttons){
     if(buttons.isRightButton()){
+        // generate zoom factor menu
         COptionMenu* menu = new COptionMenu(CRect(0, 0, 0, 0), nullptr, -1);
         menu->setStyle(COptionMenu::kPopupStyle);
-        menu->addEntry("100%");  // TODO fixme
-        menu->addEntry("150%");  // TODO fixme
-        menu->addEntry("200%");  // TODO fixme
+        for(float zoomFactor = this->minZoomFactor; zoomFactor <= this->maxZoomFactor; zoomFactor += this->zoomFactorStep){
+            menu->addEntry(std::to_string(static_cast<uint16>(100*zoomFactor)) + "%");
+        }
         menu->popup(this->velocityGUIEditor->getFrame(), point);
+
+        // apply selected zoom factor
+        float zoomFactor = this->minZoomFactor + this->zoomFactorStep * static_cast<uint8>(menu->getValue());
+        this->velocityGUIEditor->getFrame()->setZoom(zoomFactor);
+        this->velocityGUIEditor->requestResize(zoomFactor);
+
         menu->forget();
         return kMouseEventHandled;
     }
@@ -47,11 +54,14 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
         return false;
     }
 
-    // background image
-    CBitmap* cbmp = new CBitmap("background.png");
-    frame->setBackground(cbmp);
+    // background
+    CBitmap* bitmap = new CBitmap("background.png");
+    CView* bgview = new CView(size);
+    bgview->setBackground(bitmap);  // set background image to view
+
+    frame->addView(bgview);
     frame->open(parent);
-    cbmp->forget();  // release background image
+    bitmap->forget();  // release background image
 
     // controls
     this->contextMenu = this->createContextMenu(this->backgroundWidth, this->backgroundHeight);
@@ -156,6 +166,17 @@ void VelocityGUIEditor::valueChanged(CControl* control){
 
     this->controller->setParamNormalized(paramId, value);
     this->controller->performEdit(paramId, value);
+}
+
+bool VelocityGUIEditor::requestResize(float zoom){
+    if(this->plugFrame == nullptr){
+        return false;
+    }
+
+    ViewRect newRect(0, 0, zoom*this->backgroundWidth, zoom*this->backgroundHeight);
+    this->getFrame()->setZoom(zoom);
+
+    return this->plugFrame->resizeView(this, &newRect) == kResultTrue;
 }
 
 void VelocityGUIEditor::updateVelocityLabel(ParamValue rawVelocity, bool isInput){

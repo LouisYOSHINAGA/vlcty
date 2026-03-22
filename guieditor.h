@@ -22,6 +22,9 @@ class VelocityGUIEditor : public VSTGUIEditor
             CContextMenu(const CRect&, VelocityGUIEditor*);
             CMouseEventResult onMouseDown(CPoint&, const CButtonState&) override;
         protected:
+            static constexpr float minZoomFactor = 1.0;
+            static constexpr float maxZoomFactor = 2.0;
+            static constexpr float zoomFactorStep = 0.25;
             VelocityGUIEditor* velocityGUIEditor;
     };
 
@@ -64,9 +67,11 @@ class VelocityGUIEditor : public VSTGUIEditor
         CTextLabel* sliderLabels[N_SLIDERS];
         CTextEdit* textEdits[N_SLIDERS];
 
-        // label
+        // context menu
         VelocityGUIEditor::CContextMenu* createContextMenu(uint16, uint16);
+        bool requestResize(float);
 
+        // label
         CTextLabel* createLabel(std::string, uint16, uint16, uint16, uint16,
                                 bool = true, uint8 = defaultFontsize,
                                 bool = false, CHoriTxtAlign = kLeftText);
