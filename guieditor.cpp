@@ -7,10 +7,30 @@ namespace Steinberg {
 namespace Vst {
 
 
+VelocityGUIEditor::CContextMenu::CContextMenu(const CRect& size, VelocityGUIEditor* velocityGUIEditor)
+    : CView(size)
+    , velocityGUIEditor(velocityGUIEditor){
+}
+
+CMouseEventResult VelocityGUIEditor::CContextMenu::onMouseDown(CPoint& point, const CButtonState& buttons){
+    if(buttons.isRightButton()){
+        COptionMenu* menu = new COptionMenu(CRect(0, 0, 0, 0), nullptr, -1);
+        menu->setStyle(COptionMenu::kPopupStyle);
+        menu->addEntry("100%");  // TODO fixme
+        menu->addEntry("150%");  // TODO fixme
+        menu->addEntry("200%");  // TODO fixme
+        menu->popup(this->velocityGUIEditor->getFrame(), point);
+        menu->forget();
+        return kMouseEventHandled;
+    }
+
+    return kMouseEventNotHandled;
+}
+
 VelocityGUIEditor::VelocityGUIEditor(EditController* controller)
     : VSTGUIEditor(controller)
     , currentInputVelocity(DEFAULT_VELOCITY), currentOutputVelocity(DEFAULT_VELOCITY)
-    , velocityLabel(nullptr)
+    , contextMenu(nullptr), velocityLabel(nullptr)
     , sliders{}, sliderLabels{}, textEdits{}{
     ViewRect viewRect(0, 0, this->backgroundWidth, this->backgroundHeight);
     setRect(viewRect);
@@ -34,6 +54,7 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
     cbmp->forget();  // release background image
 
     // controls
+    this->contextMenu = this->createContextMenu(this->backgroundWidth, this->backgroundHeight);
     this->createLabel(MYVST_VSTNAME, 30, 0, 130, 45, false, this->defaultFontsize+2, true, kCenterText);
     this->createCombobox(PARAM_ID_CORRECT_TYPE, correctTypeNames, 170, 7.5, 90, 30,
                          this->defaultFontsize, false, kCenterText);
@@ -154,6 +175,15 @@ void VelocityGUIEditor::updateVelocityLabel(ParamValue rawVelocity, bool isInput
              this->currentInputVelocity, this->currentOutputVelocity);
     this->velocityLabel->setText(labelText);
     this->velocityLabel->invalid();
+}
+
+VelocityGUIEditor::CContextMenu* VelocityGUIEditor::createContextMenu(uint16 w, uint16 h){
+    CRect size(0, 0, w, h);
+    CContextMenu* contextMenu = new CContextMenu(size, this);
+
+    frame->addView(contextMenu);
+
+    return contextMenu;
 }
 
 CTextLabel* VelocityGUIEditor::createLabel(std::string text, uint16 x, uint16 y, uint16 w, uint16 h,

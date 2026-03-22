@@ -16,6 +16,15 @@ using namespace VSTGUI;
 
 class VelocityGUIEditor : public VSTGUIEditor
                         , public IControlListener {
+
+    class CContextMenu : public CView {
+        public:
+            CContextMenu(const CRect&, VelocityGUIEditor*);
+            CMouseEventResult onMouseDown(CPoint&, const CButtonState&) override;
+        protected:
+            VelocityGUIEditor* velocityGUIEditor;
+    };
+
     public:
         VelocityGUIEditor(EditController*);
         virtual bool PLUGIN_API open(void*, const PlatformType& = PlatformType::kDefaultNative);
@@ -49,12 +58,15 @@ class VelocityGUIEditor : public VSTGUIEditor
         uint8 currentOutputVelocity;
 
         // pointers to controls
+        CContextMenu* contextMenu;
         CTextLabel* velocityLabel;
         CHorizontalSlider* sliders[N_SLIDERS];
         CTextLabel* sliderLabels[N_SLIDERS];
         CTextEdit* textEdits[N_SLIDERS];
 
         // label
+        VelocityGUIEditor::CContextMenu* createContextMenu(uint16, uint16);
+
         CTextLabel* createLabel(std::string, uint16, uint16, uint16, uint16,
                                 bool = true, uint8 = defaultFontsize,
                                 bool = false, CHoriTxtAlign = kLeftText);
