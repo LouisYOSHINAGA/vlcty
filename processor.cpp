@@ -54,7 +54,7 @@ void VelocityProcessor::processParameter(ProcessData& data){
     }
 
     int32 sampleOffset;
-    ParamValue value;
+    ParamValue value, discValue;
     for(int8 i = 0; i < data.inputParameterChanges->getParameterCount(); i++){
         IParamValueQueue* queue = data.inputParameterChanges->getParameterData(i);
         if(queue == nullptr){
@@ -62,7 +62,10 @@ void VelocityProcessor::processParameter(ProcessData& data){
         }
         if(queue->getPoint(queue->getPointCount()-1, sampleOffset, value) == kResultFalse){
             continue;
+        }else{
+            discValue = static_cast<ParamValue>(static_cast<uint8>(value * MAX_VELOCITY + EPSILON)) / MAX_VELOCITY;
         }
+
         switch(queue->getParameterId()){
             case PARAM_ID_CORRECT_TYPE:
                 this->correctType = static_cast<CorrectTypeID>(
@@ -70,13 +73,13 @@ void VelocityProcessor::processParameter(ProcessData& data){
                 );
                 break;
             case PARAM_ID_VELOCITY_FIX:
-                this->fixVelocity = value;
+                this->fixVelocity = discValue;
                 break;
             case PARAM_ID_VELOCITY_MIN:
-                this->minVelocity = value;
+                this->minVelocity = discValue;
                 break;
             case PARAM_ID_VELOCITY_MAX:
-                this->maxVelocity = value;
+                this->maxVelocity = discValue;
                 break;
             default:
                 // do nothing

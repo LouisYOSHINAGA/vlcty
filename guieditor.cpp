@@ -140,21 +140,21 @@ void VelocityGUIEditor::valueChanged(CControl* control){
 
         case PARAM_ID_VELOCITY_FIX:
             this->textEdits[SLIDER_ID_VELOCITY_FIX]->setText(
-                std::to_string(static_cast<uint8>(value * MAX_VELOCITY)).c_str()
+                std::to_string(static_cast<uint8>(value * MAX_VELOCITY + EPSILON)).c_str()
             );
             this->sliders[SLIDER_ID_VELOCITY_FIX]->setValueNormalized(value);
             break;
 
         case PARAM_ID_VELOCITY_MIN:
             this->textEdits[SLIDER_ID_VELOCITY_MIN]->setText(
-                std::to_string(static_cast<uint8>(value * MAX_VELOCITY)).c_str()
+                std::to_string(static_cast<uint8>(value * MAX_VELOCITY + EPSILON)).c_str()
             );
             this->sliders[SLIDER_ID_VELOCITY_MIN]->setValueNormalized(value);
             break;
 
         case PARAM_ID_VELOCITY_MAX:
             this->textEdits[SLIDER_ID_VELOCITY_MAX]->setText(
-                std::to_string(static_cast<uint8>(value * MAX_VELOCITY)).c_str()
+                std::to_string(static_cast<uint8>(value * MAX_VELOCITY + EPSILON)).c_str()
             );
             this->sliders[SLIDER_ID_VELOCITY_MAX]->setValueNormalized(value);
             break;
@@ -184,7 +184,7 @@ void VelocityGUIEditor::updateVelocityLabel(ParamValue rawVelocity, bool isInput
         return;
     }
 
-    uint8 velocity = static_cast<uint8>(rawVelocity * (N_VELOCITY_STEPS - 1) + EPSILON);
+    uint8 velocity = static_cast<uint8>(rawVelocity * MAX_VELOCITY + EPSILON);
     if(isInput){
         this->currentInputVelocity = velocity;
     }else{
