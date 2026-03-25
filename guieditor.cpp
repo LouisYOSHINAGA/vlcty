@@ -58,9 +58,7 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
     CBitmap* bitmap = new CBitmap("background.png");
     CView* bgview = new CView(size);
     bgview->setBackground(bitmap);  // set background image to view
-
     frame->addView(bgview);
-    frame->open(parent);
     bitmap->forget();  // release background image
 
     // controls
@@ -90,6 +88,8 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
     for(int8 i = 0; i < N_SLIDERS; i++){
         this->textEdits[i]->setStringToValueFunction(&VelocityGUIEditor::parseInputText);
     }
+
+    frame->open(parent);  // register frame to DAW window
 
     return true;
 }
