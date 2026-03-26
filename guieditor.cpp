@@ -63,10 +63,10 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
 
     // controls
     this->contextMenu = this->createContextMenu(this->backgroundWidth, this->backgroundHeight);
-    this->createLabel(MYVST_VSTNAME, 30, 0, 130, 45, false, this->defaultFontsize+2, true, kCenterText);
+    this->createLabel(MYVST_VSTNAME, 30, 0, 130, 45, this->defaultFontsize+2, true, kCenterText);
     this->createCombobox(PARAM_ID_CORRECT_TYPE, correctTypeNames, 170, 7.5, 90, 30,
                          this->defaultFontsize, false, kCenterText);
-    this->velocityLabel = this->createLabel("    ->    ", 270, 0, 110, 45, false, this->defaultFontsize, false, kCenterText);
+    this->velocityLabel = this->createLabel("    ->    ", 270, 0, 110, 45, this->defaultFontsize, false, kCenterText);
 
     this->sliders[SLIDER_ID_VELOCITY_FIX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_FIX, 25, 45);
     this->sliders[SLIDER_ID_VELOCITY_MIN] = this->createHorizontalSlider(PARAM_ID_VELOCITY_MIN, 25, 90);
@@ -89,6 +89,8 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
         this->textEdits[i]->setStringToValueFunction(&VelocityGUIEditor::parseInputText);
     }
 
+    this->lockControls(this->controller->getParamNormalized(PARAM_ID_CORRECT_TYPE));
+
     frame->open(parent);  // register frame to DAW window
 
     return true;
@@ -108,35 +110,7 @@ void VelocityGUIEditor::valueChanged(CControl* control){
 
     switch(paramId){
         case PARAM_ID_CORRECT_TYPE:
-            bool isLockFix, isLockMin, isLockMax;
-            switch(static_cast<CorrectTypeID>(value * (N_CORRECT_TYPES - 1) + EPSILON)){
-                case CORRECT_TYPE_THROUGH:
-                    isLockFix = isLockMin = isLockMax = true;
-                    break;
-                case CORRECT_TYPE_FIX:
-                    isLockFix = false;
-                    isLockMin = isLockMax = true;
-                    break;
-                case CORRECT_TYPE_REMAP:
-                case CORRECT_TYPE_CLIP:
-                    isLockFix = true;
-                    isLockMin = isLockMax = false;
-                    break;
-                default:
-                    break;
-            }
-
-            this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_FIX], isLockFix);
-            this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MIN], isLockMin);
-            this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MAX], isLockMax);
-
-            this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_FIX], isLockFix);
-            this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MIN], isLockMin);
-            this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MAX], isLockMax);
-
-            this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_FIX], isLockFix);
-            this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_MIN], isLockMin);
-            this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_MAX], isLockMax);
+            this->lockControls(value);
             break;
 
         case PARAM_ID_VELOCITY_FIX:
@@ -209,12 +183,12 @@ VelocityGUIEditor::CContextMenu* VelocityGUIEditor::createContextMenu(uint16 w, 
 }
 
 CTextLabel* VelocityGUIEditor::createLabel(std::string text, uint16 x, uint16 y, uint16 w, uint16 h,
-                                           bool isLock, uint8 fontsize, bool isBold, CHoriTxtAlign align){
-    return this->createLabel(text.c_str(), x, y, w, h, isLock, fontsize, isBold, align);
+                                           uint8 fontsize, bool isBold, CHoriTxtAlign align){
+    return this->createLabel(text.c_str(), x, y, w, h, fontsize, isBold, align);
 }
 
 CTextLabel* VelocityGUIEditor::createLabel(UTF8StringPtr text, uint16 x, uint16 y, uint16 w, uint16 h,
-                                           bool isLock, uint8 fontsize, bool isBold, CHoriTxtAlign align){
+                                           uint8 fontsize, bool isBold, CHoriTxtAlign align){
     CRect size(0, 0, w, h);
     size.offset(x, y);
 
@@ -231,10 +205,6 @@ CTextLabel* VelocityGUIEditor::createLabel(UTF8StringPtr text, uint16 x, uint16 
     #endif
 
     frame->addView(label);
-
-    if(isLock){
-        this->lockLabel(label, true);
-    }
 
     return label;
 }
@@ -266,7 +236,7 @@ COptionMenu* VelocityGUIEditor::createCombobox(ParamID tag, std::vector<UTF8Stri
     return combobox;
 }
 
-CHorizontalSlider* VelocityGUIEditor::createHorizontalSlider(ParamID tag, uint16 x, uint16 y, bool isLock){
+CHorizontalSlider* VelocityGUIEditor::createHorizontalSlider(ParamID tag, uint16 x, uint16 y){
     CBitmap* sliderBackground = new CBitmap("sliderBackground.png");
     CBitmap* sliderHandle = new CBitmap("sliderHandle.png");
 
@@ -284,10 +254,6 @@ CHorizontalSlider* VelocityGUIEditor::createHorizontalSlider(ParamID tag, uint16
 
     frame->addView(slider);
 
-    if(isLock){
-        this->lockHorizontalSlider(slider, true);
-    }
-
     sliderBackground->forget();
     sliderHandle->forget();
 
@@ -300,7 +266,7 @@ void VelocityGUIEditor::lockHorizontalSlider(CHorizontalSlider* slider, bool isL
 }
 
 CTextEdit* VelocityGUIEditor::createTextEdit(ParamID tag, uint16 x, uint16 y, uint16 w, uint16 h,
-                                             bool isLock, uint8 fontsize, bool isBold, CHoriTxtAlign align){
+                                             uint8 fontsize, bool isBold, CHoriTxtAlign align){
     CRect size(0, 0, w, h);
     size.offset(x, y);
 
@@ -322,10 +288,6 @@ CTextEdit* VelocityGUIEditor::createTextEdit(ParamID tag, uint16 x, uint16 y, ui
     );
 
     frame->addView(textEdit);
-
-    if(isLock){
-        this->lockTextEdit(textEdit, true);
-    }
 
     return textEdit;
 }
@@ -351,6 +313,41 @@ bool VelocityGUIEditor::parseInputText(UTF8StringPtr inputText, float& value, CT
     }
 
     return true;
+}
+
+void VelocityGUIEditor::lockControls(ParamValue value){
+    CorrectTypeID correctType = static_cast<CorrectTypeID>(value * (N_CORRECT_TYPES - 1) + EPSILON);
+    bool isLockFix, isLockMin, isLockMax;
+
+    switch(correctType){
+        case CORRECT_TYPE_THROUGH:
+            isLockFix = isLockMin = isLockMax = true;
+            break;
+        case CORRECT_TYPE_FIX:
+            isLockFix = false;
+            isLockMin = isLockMax = true;
+            break;
+        case CORRECT_TYPE_REMAP:
+        case CORRECT_TYPE_CLIP:
+            isLockFix = true;
+            isLockMin = isLockMax = false;
+            break;
+        default:  // never reached
+            isLockFix = isLockMin = isLockMax = true;
+            break;
+    }
+
+    this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_FIX], isLockFix);
+    this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MIN], isLockMin);
+    this->lockHorizontalSlider(this->sliders[SLIDER_ID_VELOCITY_MAX], isLockMax);
+
+    this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_FIX], isLockFix);
+    this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MIN], isLockMin);
+    this->lockLabel(this->sliderLabels[SLIDER_ID_VELOCITY_MAX], isLockMax);
+
+    this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_FIX], isLockFix);
+    this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_MIN], isLockMin);
+    this->lockTextEdit(this->textEdits[SLIDER_ID_VELOCITY_MAX], isLockMax);
 }
 
 

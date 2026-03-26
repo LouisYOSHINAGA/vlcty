@@ -73,11 +73,9 @@ class VelocityGUIEditor : public VSTGUIEditor
 
         // label
         CTextLabel* createLabel(std::string, uint16, uint16, uint16, uint16,
-                                bool = true, uint8 = defaultFontsize,
-                                bool = false, CHoriTxtAlign = kLeftText);
+                                uint8 = defaultFontsize, bool = false, CHoriTxtAlign = kLeftText);
         CTextLabel* createLabel(UTF8StringPtr, uint16, uint16, uint16, uint16,
-                                bool = true, uint8 = defaultFontsize,
-                                bool = false, CHoriTxtAlign = kLeftText);
+                                uint8 = defaultFontsize, bool = false, CHoriTxtAlign = kLeftText);
         void lockLabel(CTextLabel*, bool = true);
 
         // combobox
@@ -87,15 +85,17 @@ class VelocityGUIEditor : public VSTGUIEditor
                                     CHoriTxtAlign = kLeftText);
 
         // horizontal slider
-        CHorizontalSlider* createHorizontalSlider(ParamID, uint16, uint16, bool = true);
+        CHorizontalSlider* createHorizontalSlider(ParamID, uint16, uint16);
         void lockHorizontalSlider(CHorizontalSlider*, bool = true);
 
         // text edit
         CTextEdit* createTextEdit(ParamID, uint16, uint16, uint16, uint16,
-                                  bool = true, uint8 = defaultFontsize,
-                                  bool = false, CHoriTxtAlign = kLeftText);
+                                  uint8 = defaultFontsize, bool = false, CHoriTxtAlign = kLeftText);
         void lockTextEdit(CTextEdit*, bool = true);
         static bool parseInputText(UTF8StringPtr, float&, CTextEdit*);
+
+        // lock
+        void lockControls(ParamValue);
 };
 
 
