@@ -69,7 +69,6 @@ tresult PLUGIN_API VelocityController::initialize(FUnknown* context){
     );
     parameters.addParameter(outputVelocity);
 
-
     return result;
 }
 

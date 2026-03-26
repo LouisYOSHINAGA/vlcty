@@ -44,13 +44,14 @@ VelocityGUIEditor::VelocityGUIEditor(EditController* controller)
 }
 
 bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platformType){
-    if(frame){  // frame is already created
+    if(this->frame){  // frame is already created
         return false;
     }
 
+    // frame
     CRect size(0, 0, this->backgroundWidth, this->backgroundHeight);  // frame size
-    frame = new CFrame(size, this);  // create frame
-    if(frame == nullptr){
+    this->frame = new CFrame(size, this);  // create frame
+    if(this->frame == nullptr){
         return false;
     }
 
@@ -58,7 +59,7 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
     CBitmap* bitmap = new CBitmap("background.png");
     CView* bgview = new CView(size);
     bgview->setBackground(bitmap);  // set background image to view
-    frame->addView(bgview);
+    this->frame->addView(bgview);
     bitmap->forget();  // release background image
 
     // controls
@@ -91,15 +92,15 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
 
     this->lockControls(this->controller->getParamNormalized(PARAM_ID_CORRECT_TYPE));
 
-    frame->open(parent);  // register frame to DAW window
+    this->frame->open(parent);  // register frame to DAW window
 
     return true;
 }
 
 void PLUGIN_API VelocityGUIEditor::close(){
-    if(frame){  // release frame
-        frame->forget();
-        frame = 0;
+    if(this->frame){  // release frame
+        this->frame->forget();
+        this->frame = 0;
     }
     static_cast<VelocityController*>(this->controller.get())->closeView();  // notify controller that GUI is closed
 }
@@ -177,7 +178,7 @@ VelocityGUIEditor::CContextMenu* VelocityGUIEditor::createContextMenu(uint16 w, 
     CRect size(0, 0, w, h);
     CContextMenu* contextMenu = new CContextMenu(size, this);
 
-    frame->addView(contextMenu);
+    this->frame->addView(contextMenu);
 
     return contextMenu;
 }
@@ -204,7 +205,7 @@ CTextLabel* VelocityGUIEditor::createLabel(UTF8StringPtr text, uint16 x, uint16 
         label->setFrameColor(kTransparentCColor);
     #endif
 
-    frame->addView(label);
+    this->frame->addView(label);
 
     return label;
 }
@@ -231,7 +232,7 @@ COptionMenu* VelocityGUIEditor::createCombobox(ParamID tag, std::vector<UTF8Stri
     combobox->setFrameColor(kWhiteCColor);
     combobox->setValueNormalized(this->controller->getParamNormalized(tag));
 
-    frame->addView(combobox);
+    this->frame->addView(combobox);
 
     return combobox;
 }
@@ -252,7 +253,7 @@ CHorizontalSlider* VelocityGUIEditor::createHorizontalSlider(ParamID tag, uint16
     slider->setBackgroundOffset(trackOffset);
     slider->setValueNormalized(this->controller->getParamNormalized(tag));
 
-    frame->addView(slider);
+    this->frame->addView(slider);
 
     sliderBackground->forget();
     sliderHandle->forget();
@@ -282,12 +283,12 @@ CTextEdit* VelocityGUIEditor::createTextEdit(ParamID tag, uint16 x, uint16 y, ui
         textEdit->setFrameColor(kTransparentCColor);
     #endif
     textEdit->setText(
-        std::string(
-            std::to_string(static_cast<uint8>(this->controller->getParamNormalized(tag) * MAX_VELOCITY))
+        std::to_string(
+            static_cast<uint8>(this->controller->getParamNormalized(tag) * MAX_VELOCITY + EPSILON)
         ).c_str()
     );
 
-    frame->addView(textEdit);
+    this->frame->addView(textEdit);
 
     return textEdit;
 }
