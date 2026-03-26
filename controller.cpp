@@ -102,5 +102,9 @@ IPlugView* PLUGIN_API VelocityController::createView(const char* name){
     return 0;
 }
 
+void VelocityController::closeView(void){
+    this->velocityGUIEditor = nullptr;
+}
+
 
 } }

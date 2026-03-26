@@ -99,6 +99,7 @@ void PLUGIN_API VelocityGUIEditor::close(){
         frame->forget();
         frame = 0;
     }
+    static_cast<VelocityController*>(this->controller.get())->closeView();  // notify controller that GUI is closed
 }
 
 void VelocityGUIEditor::valueChanged(CControl* control){

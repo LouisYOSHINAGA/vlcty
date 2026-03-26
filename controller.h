@@ -31,6 +31,7 @@ class VelocityController: public EditController {
         tresult PLUGIN_API initialize(FUnknown*);
         tresult PLUGIN_API setParamNormalized(ParamID, ParamValue);
         IPlugView* PLUGIN_API createView(const char*);
+        void closeView(void);
 };
 
 
