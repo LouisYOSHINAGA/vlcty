@@ -1,5 +1,6 @@
 #include "guieditor.h"
 #include "config.h"
+#include <cstdio>
 #include <stdexcept>
 
 
@@ -20,12 +21,12 @@ CMouseEventResult VelocityGUIEditor::CContextMenu::onMouseDown(CPoint& point, co
         for(float zoomFactor = this->minZoomFactor; zoomFactor <= this->maxZoomFactor; zoomFactor += this->zoomFactorStep){
             menu->addEntry(std::to_string(static_cast<uint16>(100*zoomFactor)) + "%");
         }
-        menu->popup(this->velocityGUIEditor->getFrame(), point);
 
-        // apply selected zoom factor
-        float zoomFactor = this->minZoomFactor + this->zoomFactorStep * static_cast<uint8>(menu->getValue());
-        this->velocityGUIEditor->getFrame()->setZoom(zoomFactor);
-        this->velocityGUIEditor->requestResize(zoomFactor);
+        // apply selected zoom factor; keep the current zoom level when the menu is cancelled
+        if(menu->popup(this->velocityGUIEditor->getFrame(), point)){
+            float zoomFactor = this->minZoomFactor + this->zoomFactorStep * static_cast<uint8>(menu->getValue());
+            this->velocityGUIEditor->requestResize(zoomFactor);
+        }
 
         menu->forget();
         return kMouseEventHandled;
@@ -37,10 +38,18 @@ CMouseEventResult VelocityGUIEditor::CContextMenu::onMouseDown(CPoint& point, co
 VelocityGUIEditor::VelocityGUIEditor(EditController* controller)
     : VSTGUIEditor(controller)
     , currentInputVelocity(DEFAULT_VELOCITY), currentOutputVelocity(DEFAULT_VELOCITY)
-    , contextMenu(nullptr), velocityLabel(nullptr)
+    , contextMenu(nullptr), velocityLabel(nullptr), correctTypeCombobox(nullptr)
     , sliders{}, sliderLabels{}, textEdits{}{
     ViewRect viewRect(0, 0, this->backgroundWidth, this->backgroundHeight);
     setRect(viewRect);
+}
+
+VelocityGUIEditor::~VelocityGUIEditor(){
+    // in case the host destroys the editor without calling close(),
+    // make sure the controller does not keep a dangling pointer to this editor
+    if(this->controller){
+        static_cast<VelocityController*>(this->controller.get())->closeView(this);
+    }
 }
 
 bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platformType){
@@ -65,8 +74,8 @@ bool PLUGIN_API VelocityGUIEditor::open(void* parent, const PlatformType& platfo
     // controls
     this->contextMenu = this->createContextMenu(this->backgroundWidth, this->backgroundHeight);
     this->createLabel(MYVST_VSTNAME, 30, 0, 130, 45, this->defaultFontsize+2, true, kCenterText);
-    this->createCombobox(PARAM_ID_CORRECT_TYPE, correctTypeNames, 170, 7.5, 90, 30,
-                         this->defaultFontsize, false, kCenterText);
+    this->correctTypeCombobox = this->createCombobox(PARAM_ID_CORRECT_TYPE, correctTypeNames, 170, 7.5, 90, 30,
+                                                     this->defaultFontsize, false, kCenterText);
     this->velocityLabel = this->createLabel("    ->    ", 270, 0, 110, 45, this->defaultFontsize, false, kCenterText);
 
     this->sliders[SLIDER_ID_VELOCITY_FIX] = this->createHorizontalSlider(PARAM_ID_VELOCITY_FIX, 25, 45);
@@ -102,46 +111,48 @@ void PLUGIN_API VelocityGUIEditor::close(){
         this->frame->forget();
         this->frame = 0;
     }
-    static_cast<VelocityController*>(this->controller.get())->closeView();  // notify controller that GUI is closed
+    this->contextMenu = nullptr;
+    this->velocityLabel = nullptr;
+    this->correctTypeCombobox = nullptr;
+    for(int8 i = 0; i < N_SLIDERS; i++){
+        this->sliders[i] = nullptr;
+        this->sliderLabels[i] = nullptr;
+        this->textEdits[i] = nullptr;
+    }
+    static_cast<VelocityController*>(this->controller.get())->closeView(this);  // notify controller that GUI is closed
 }
 
 void VelocityGUIEditor::valueChanged(CControl* control){
-    int8 paramId = control->getTag();
+    int32 paramId = control->getTag();
     float value = control->getValueNormalized();
 
-    switch(paramId){
+    // VelocityController::setParamNormalized reflects the change
+    // back to the related controls via updateControl()
+    this->controller->setParamNormalized(paramId, value);
+    this->controller->performEdit(paramId, value);
+}
+
+void VelocityGUIEditor::updateControl(ParamID tag, ParamValue value){
+    switch(tag){
         case PARAM_ID_CORRECT_TYPE:
-            this->lockControls(value);
+            if(this->correctTypeCombobox != nullptr){  // in case GUI is not opened yet
+                this->correctTypeCombobox->setValueNormalized(value);
+                this->lockControls(value);
+            }
             break;
-
         case PARAM_ID_VELOCITY_FIX:
-            this->textEdits[SLIDER_ID_VELOCITY_FIX]->setText(
-                std::to_string(static_cast<uint8>(value * MAX_VELOCITY + EPSILON)).c_str()
-            );
-            this->sliders[SLIDER_ID_VELOCITY_FIX]->setValueNormalized(value);
+            this->updateSliderControl(SLIDER_ID_VELOCITY_FIX, value);
             break;
-
         case PARAM_ID_VELOCITY_MIN:
-            this->textEdits[SLIDER_ID_VELOCITY_MIN]->setText(
-                std::to_string(static_cast<uint8>(value * MAX_VELOCITY + EPSILON)).c_str()
-            );
-            this->sliders[SLIDER_ID_VELOCITY_MIN]->setValueNormalized(value);
+            this->updateSliderControl(SLIDER_ID_VELOCITY_MIN, value);
             break;
-
         case PARAM_ID_VELOCITY_MAX:
-            this->textEdits[SLIDER_ID_VELOCITY_MAX]->setText(
-                std::to_string(static_cast<uint8>(value * MAX_VELOCITY + EPSILON)).c_str()
-            );
-            this->sliders[SLIDER_ID_VELOCITY_MAX]->setValueNormalized(value);
+            this->updateSliderControl(SLIDER_ID_VELOCITY_MAX, value);
             break;
-
         default:
             // do nothing
             break;
     }
-
-    this->controller->setParamNormalized(paramId, value);
-    this->controller->performEdit(paramId, value);
 }
 
 bool VelocityGUIEditor::requestResize(float zoom){
@@ -197,6 +208,7 @@ CTextLabel* VelocityGUIEditor::createLabel(UTF8StringPtr text, uint16 x, uint16 
     CTextLabel* label = new CTextLabel(size, text);
 
     label->setFont(font);
+    font->forget();  // label keeps its own reference
     label->setHoriAlign(align);
     label->setBackColor(kTransparentCColor);
     #ifdef DEBUG_GUIEDITOR
@@ -227,6 +239,7 @@ COptionMenu* VelocityGUIEditor::createCombobox(ParamID tag, std::vector<UTF8Stri
         combobox->addEntry(items[i]);
     }
     combobox->setFont(font);
+    font->forget();  // combobox keeps its own reference
     combobox->setHoriAlign(align);
     combobox->setBackColor(kTransparentCColor);
     combobox->setFrameColor(kWhiteCColor);
@@ -266,6 +279,17 @@ void VelocityGUIEditor::lockHorizontalSlider(CHorizontalSlider* slider, bool isL
     slider->setAlphaValue(isLock? 0.2: 1.0);
 }
 
+void VelocityGUIEditor::updateSliderControl(SliderID sliderId, ParamValue value){
+    if(this->sliders[sliderId] == nullptr || this->textEdits[sliderId] == nullptr){  // in case GUI is not opened yet
+        return;
+    }
+
+    this->textEdits[sliderId]->setText(
+        std::to_string(static_cast<uint8>(value * MAX_VELOCITY + EPSILON)).c_str()
+    );
+    this->sliders[sliderId]->setValueNormalized(value);
+}
+
 CTextEdit* VelocityGUIEditor::createTextEdit(ParamID tag, uint16 x, uint16 y, uint16 w, uint16 h,
                                              uint8 fontsize, bool isBold, CHoriTxtAlign align){
     CRect size(0, 0, w, h);
@@ -275,6 +299,7 @@ CTextEdit* VelocityGUIEditor::createTextEdit(ParamID tag, uint16 x, uint16 y, ui
     CTextEdit* textEdit = new CTextEdit(size, this, tag);
 
     textEdit->setFont(font);
+    font->forget();  // text edit keeps its own reference
     textEdit->setHoriAlign(align);
     textEdit->setBackColor(this->defaultBackgroundColor);
     #ifdef DEBUG_GUIEDITOR

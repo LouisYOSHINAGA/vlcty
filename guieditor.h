@@ -30,9 +30,11 @@ class VelocityGUIEditor : public VSTGUIEditor
 
     public:
         VelocityGUIEditor(EditController*);
+        ~VelocityGUIEditor();
         virtual bool PLUGIN_API open(void*, const PlatformType& = PlatformType::kDefaultNative);
         virtual void PLUGIN_API close();
         void valueChanged(CControl*);
+        void updateControl(ParamID, ParamValue);
         void updateVelocityLabel(ParamValue, bool);
         DELEGATE_REFCOUNT(VSTGUIEditor)
 
@@ -63,6 +65,7 @@ class VelocityGUIEditor : public VSTGUIEditor
         // pointers to controls
         CContextMenu* contextMenu;
         CTextLabel* velocityLabel;
+        COptionMenu* correctTypeCombobox;
         CHorizontalSlider* sliders[N_SLIDERS];
         CTextLabel* sliderLabels[N_SLIDERS];
         CTextEdit* textEdits[N_SLIDERS];
@@ -87,6 +90,7 @@ class VelocityGUIEditor : public VSTGUIEditor
         // horizontal slider
         CHorizontalSlider* createHorizontalSlider(ParamID, uint16, uint16);
         void lockHorizontalSlider(CHorizontalSlider*, bool = true);
+        void updateSliderControl(SliderID, ParamValue);
 
         // text edit
         CTextEdit* createTextEdit(ParamID, uint16, uint16, uint16, uint16,

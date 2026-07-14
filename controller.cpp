@@ -1,5 +1,6 @@
 #include "controller.h"
 #include "config.h"
+#include "base/source/fstreamer.h"
 
 
 namespace Steinberg {
@@ -72,10 +73,35 @@ tresult PLUGIN_API VelocityController::initialize(FUnknown* context){
     return result;
 }
 
+tresult PLUGIN_API VelocityController::setComponentState(IBStream* state){
+    if(state == nullptr){
+        return kResultFalse;
+    }
+
+    // read the processor state (see VelocityProcessor::getState) and sync the parameters
+    IBStreamer streamer(state, kLittleEndian);
+    int32 correctType;
+    float fixVelocity, minVelocity, maxVelocity;
+    if(!streamer.readInt32(correctType) || !streamer.readFloat(fixVelocity)
+       || !streamer.readFloat(minVelocity) || !streamer.readFloat(maxVelocity)){
+        return kResultFalse;
+    }
+    if(correctType < 0 || N_CORRECT_TYPES <= correctType){
+        return kResultFalse;
+    }
+
+    this->setParamNormalized(PARAM_ID_CORRECT_TYPE, static_cast<ParamValue>(correctType) / (N_CORRECT_TYPES - 1));
+    this->setParamNormalized(PARAM_ID_VELOCITY_FIX, fixVelocity);
+    this->setParamNormalized(PARAM_ID_VELOCITY_MIN, minVelocity);
+    this->setParamNormalized(PARAM_ID_VELOCITY_MAX, maxVelocity);
+
+    return kResultTrue;
+}
+
 tresult PLUGIN_API VelocityController::setParamNormalized(ParamID tag, ParamValue value){
-    EditController::setParamNormalized(tag, value);
+    tresult result = EditController::setParamNormalized(tag, value);
     if(this->velocityGUIEditor == nullptr){  // in case GUI is closed
-        return kResultOk;
+        return result;
     }
 
     switch(tag){
@@ -86,11 +112,11 @@ tresult PLUGIN_API VelocityController::setParamNormalized(ParamID tag, ParamValu
             this->velocityGUIEditor->updateVelocityLabel(value, false);
             break;
         default:
-            // do nothing
+            this->velocityGUIEditor->updateControl(tag, value);
             break;
     }
 
-    return kResultOk;
+    return result;
 }
 
 IPlugView* PLUGIN_API VelocityController::createView(const char* name){
@@ -101,8 +127,10 @@ IPlugView* PLUGIN_API VelocityController::createView(const char* name){
     return 0;
 }
 
-void VelocityController::closeView(void){
-    this->velocityGUIEditor = nullptr;
+void VelocityController::closeView(VelocityGUIEditor* velocityGUIEditor){
+    if(this->velocityGUIEditor == velocityGUIEditor){  // ignore notifications from stale editors
+        this->velocityGUIEditor = nullptr;
+    }
 }
 
 

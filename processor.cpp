@@ -1,6 +1,8 @@
 #include "processor.h"
 #include "config.h"
+#include "base/source/fstreamer.h"
 #include <algorithm>
+#include <cstring>
 
 
 namespace Steinberg {
@@ -13,11 +15,11 @@ FUnknown* VelocityProcessor::createInstance(void*){
 
 VelocityProcessor::VelocityProcessor()
     : correctType(CORRECT_TYPE_THROUGH)
-    , fixVelocity(static_cast<float>(DEFAULT_VELOCITY) / N_VELOCITY_STEPS)
-    , minVelocity(static_cast<float>(DEFAULT_VELOCITY) / N_VELOCITY_STEPS)
-    , maxVelocity(static_cast<float>(DEFAULT_VELOCITY) / N_VELOCITY_STEPS)
-    , inputVelocity(DEFAULT_VELOCITY)
-    , outputVelocity(DEFAULT_VELOCITY){
+    , fixVelocity(static_cast<float>(DEFAULT_VELOCITY) / MAX_VELOCITY)
+    , minVelocity(static_cast<float>(DEFAULT_VELOCITY) / MAX_VELOCITY)
+    , maxVelocity(static_cast<float>(DEFAULT_VELOCITY) / MAX_VELOCITY)
+    , inputVelocity(static_cast<float>(DEFAULT_VELOCITY) / MAX_VELOCITY)
+    , outputVelocity(static_cast<float>(DEFAULT_VELOCITY) / MAX_VELOCITY){
     setControllerClass(ControllerUID);
 }
 
@@ -45,6 +47,7 @@ tresult PLUGIN_API VelocityProcessor::setBusArrangements(SpeakerArrangement* inp
 tresult PLUGIN_API VelocityProcessor::process(ProcessData& data){
     processParameter(data);
     processEvent(data);
+    clearAudioOutput(data);
     return kResultTrue;
 }
 
@@ -55,7 +58,7 @@ void VelocityProcessor::processParameter(ProcessData& data){
 
     int32 sampleOffset;
     ParamValue value, discValue;
-    for(int8 i = 0; i < data.inputParameterChanges->getParameterCount(); i++){
+    for(int32 i = 0; i < data.inputParameterChanges->getParameterCount(); i++){
         IParamValueQueue* queue = data.inputParameterChanges->getParameterData(i);
         if(queue == nullptr){
             continue;
@@ -172,6 +175,70 @@ void VelocityProcessor::sendParameterToController(ParamID paramId, float rawVelo
     if(queue){
         queue->addPoint(sampleOffset, rawVelocity, queueIndex);
     }
+}
+
+void VelocityProcessor::clearAudioOutput(ProcessData& data){
+    // the audio output bus is a dummy (see initialize()); keep it silent
+    // some hosts hand over uninitialized buffers, so they must be cleared explicitly
+    if(data.outputs == nullptr){
+        return;
+    }
+
+    for(int32 i = 0; i < data.numOutputs; i++){
+        AudioBusBuffers& output = data.outputs[i];
+        for(int32 channel = 0; channel < output.numChannels; channel++){
+            if(data.symbolicSampleSize == kSample32){
+                if(output.channelBuffers32[channel] != nullptr){
+                    memset(output.channelBuffers32[channel], 0, data.numSamples * sizeof(Sample32));
+                }
+            }else{
+                if(output.channelBuffers64[channel] != nullptr){
+                    memset(output.channelBuffers64[channel], 0, data.numSamples * sizeof(Sample64));
+                }
+            }
+        }
+        output.silenceFlags = (static_cast<uint64>(1) << output.numChannels) - 1;
+    }
+}
+
+tresult PLUGIN_API VelocityProcessor::setState(IBStream* state){
+    if(state == nullptr){
+        return kResultFalse;
+    }
+
+    IBStreamer streamer(state, kLittleEndian);
+    int32 correctType;
+    float fixVelocity, minVelocity, maxVelocity;
+    if(!streamer.readInt32(correctType) || !streamer.readFloat(fixVelocity)
+       || !streamer.readFloat(minVelocity) || !streamer.readFloat(maxVelocity)){
+        return kResultFalse;
+    }
+    if(correctType < 0 || N_CORRECT_TYPES <= correctType){
+        return kResultFalse;
+    }
+
+    this->correctType = static_cast<CorrectTypeID>(correctType);
+    this->fixVelocity = std::clamp(fixVelocity, 0.0f, 1.0f);
+    this->minVelocity = std::clamp(minVelocity, 0.0f, 1.0f);
+    this->maxVelocity = std::clamp(maxVelocity, 0.0f, 1.0f);
+
+    return kResultTrue;
+}
+
+tresult PLUGIN_API VelocityProcessor::getState(IBStream* state){
+    if(state == nullptr){
+        return kResultFalse;
+    }
+
+    IBStreamer streamer(state, kLittleEndian);
+    if(!streamer.writeInt32(static_cast<int32>(this->correctType))
+       || !streamer.writeFloat(this->fixVelocity)
+       || !streamer.writeFloat(this->minVelocity)
+       || !streamer.writeFloat(this->maxVelocity)){
+        return kResultFalse;
+    }
+
+    return kResultTrue;
 }
 
 

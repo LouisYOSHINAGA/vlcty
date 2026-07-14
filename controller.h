@@ -29,9 +29,10 @@ class VelocityController: public EditController {
         static FUnknown* createInstance(void*);
         VelocityController();
         tresult PLUGIN_API initialize(FUnknown*);
+        tresult PLUGIN_API setComponentState(IBStream*);
         tresult PLUGIN_API setParamNormalized(ParamID, ParamValue);
         IPlugView* PLUGIN_API createView(const char*);
-        void closeView(void);
+        void closeView(VelocityGUIEditor*);
 };
 
 
